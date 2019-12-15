@@ -42,6 +42,9 @@ more options may be added in the future
 
 ![Screenshot of example 2 command](/assets/repo-example.png?raw=true " ")
 
+`python3 guppy.py user elunico`
+![Screenshot of example 3 command](/assets/user-example.png?raw=true " ")
+
 ## IMPORTANT!!
 
 Unauthetincated requests using GitHub's API are limited to 60 per hour. Currently, this tool interfaces directly with the GitHub API in an unathenticated way. This will change later but for now keep this in mind as you use this tool. Your IP address will be cut off from `api.github.com` after 60 requests within an hour.
