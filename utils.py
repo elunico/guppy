@@ -30,6 +30,6 @@ def boxed(msg, center=CONSOLE_WIDTH - 4):
     print('-' * size)
 
 
-def formatted_time(isotime, localeString="%A, %B %d, %Y at %I:%M%P"):
+def formatted_time(isotime, localeString="%A, %B %d, %Y at %I:%M%P %Z"):
     dt = dateutil.parser.parse(isotime)
     return dt.strftime(localeString)
