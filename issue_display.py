@@ -33,6 +33,9 @@ class MultipleIssueDisplayObject(DisplayObject):
         super().__init__(data)
 
     def display(self):
+        puts(bold + uline, "Issues in Repo:")
+        clear()
+        nl()
         for issue in self.data:
             SingleIssueDisplayObject(issue).display()
             putln(black, '=' * CONSOLE_WIDTH)

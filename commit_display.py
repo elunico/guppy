@@ -84,6 +84,9 @@ class MultipleCommitDisplayObject(DisplayObject):
         super().__init__(data)
 
     def display(self):
+        puts(bold + uline, "Commits in Repo:")
+        clear()
+        nl()
         for commit in self.data:
             SingleCommitDisplayObject(commit).display()
             putln(black, '=' * CONSOLE_WIDTH)

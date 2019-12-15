@@ -117,16 +117,10 @@ def info_repo(*clas):
     elif options.issues:
         RepoInfoDisplayObject(repo_info).display()
         nl()
-        puts(bold + uline, "Issues in Repo:")
-        clear()
-        nl()
         o = IssueDisplayObjectFactory.forIssue(
             options.issues, repo_info['issues_url'][:-9]).display()
     elif options.commits:
         RepoInfoDisplayObject(repo_info).display()
-        nl()
-        puts(bold + uline, "Commits in Repo:")
-        clear()
         nl()
         o = CommitDisplayFactory.forCommit(
             options.commits, repo_info['commits_url'][:-6]).display()

@@ -44,17 +44,11 @@ def info_user(*clas):
         pass
         # RepoInfoDisplayObject(user_info).display()
         # nl()
-        # puts(bold + uline, "Issues in Repo:")
-        # clear()
-        # nl()
         # o = IssueDisplayObjectFactory.forIssue(
         #     options.issues, user_info['issues_url'][:-9]).display()
     elif options.gists:
         pass
         # RepoInfoDisplayObject(user_info).display()
-        # nl()
-        # puts(bold + uline, "Commits in Repo:")
-        # clear()
         # nl()
         # o = CommitDisplayFactory.forCommit(
         #     options.commits, user_info['commits_url'][:-6]).display()
@@ -84,6 +78,10 @@ class UserExtraInfoDisplayObject(DisplayObject):
             clear()
             LongTextDisplayObject(
                 bio, CONSOLE_WIDTH - 2, 2).display(magenta)
+            nl()
+        if self.data['blog']:
+            putEntry('Website', 'https://' +
+                     self.data['blog'], valueColor=blue)
             nl()
         putEntry('Number of (public) repos', self.data['public_repos'])
         putEntry('Number of (public) gists', self.data['public_gists'])
