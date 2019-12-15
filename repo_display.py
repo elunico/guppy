@@ -39,7 +39,10 @@ class RepoLanguageInfoDisplayObject(DisplayObject):
     def display(self):
         langs = requests.get(self.repo_info['languages_url']).json()
         total = sum([lines for (lang, lines) in langs.items()])
-        longest_lang = max([len(lang) for (lang, lines) in langs.items()])
+        try:
+            longest_lang = max([len(lang) for (lang, lines) in langs.items()])
+        except ValueError:
+            longest_lang = 2
         langs = {k: ((v / total) * 100) for (k, v) in langs.items()}
         clear()
         nl()
@@ -70,12 +73,16 @@ class RepoExtraInfoDisplayObject(DisplayObject):
             clear()
             nl()
         putln(bold, "Description:")
-        putln(
-            magenta,
-            textwrap.indent(
-                '\n'.join(textwrap.wrap(desc, width=CONSOLE_WIDTH - 2)), '  '
+        if not desc:
+            putln(magenta, 'No description.')
+        else:
+            putln(
+                magenta,
+                textwrap.indent(
+                    '\n'.join(textwrap.wrap(
+                        desc, width=CONSOLE_WIDTH - 2)), '  '
+                )
             )
-        )
         clear()
 
 
