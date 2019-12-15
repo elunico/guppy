@@ -86,7 +86,7 @@ def parse_repo_args(args):
     parser.add_argument('-i', '--issues', default=False,
                         help='List all issues on the repo using `all` or a specific issue using `-i NUMBER`')
     parser.add_argument('-c', '--commits', default=False,
-                        help='List all commits on the repo using `all` or a specific commit using `-i SHA`')
+                        help='List all commits on the repo using `all` or a specific commit using `-c HASH`')
     return parser.parse_args(args)
 
 
