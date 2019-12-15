@@ -1,5 +1,6 @@
 import textwrap
 from colors import *
+from utils import *
 
 
 class DisplayObject:
@@ -26,3 +27,7 @@ class LongTextDisplayObject(DisplayObject):
     def display(self, colorString=black):
         putln(colorString, self.indent(self.wrap(self.data), self.places))
         clear()
+
+
+def title():
+    print("~*~*~*~* G I T H U B    C O N S O L E *~*~*~*~".center(CONSOLE_WIDTH))

@@ -19,7 +19,7 @@ class RepoInfoDisplayObject(DisplayObject):
         find_at = self.repo_info['html_url']
         desc = self.repo_info['description']
 
-        print("~*~*~*~* G I T H U B    C O N S O L E *~*~*~*~".center(CONSOLE_WIDTH))
+        title()
         boxed(source)
         nl()
         puts(bold, "Name: ")
@@ -96,7 +96,6 @@ def parse_repo_args(args):
 
 
 def info_repo(*clas):
-    # todo: use argparse to parse remaining args by passing list?
     options = parse_repo_args(clas)
     user, repo = options.repo.split('/')
     req = requests.get(repo_url.format(user=user, repo=repo))

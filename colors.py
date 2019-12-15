@@ -31,3 +31,8 @@ def color_for_license(license):
         return green
     else:
         return yellow
+
+
+def putEntry(key, value, keyColor=bold, valueColor=black):
+    putln("{}{}: {}{}".format(keyColor, key, valueColor, value))
+    clear()
