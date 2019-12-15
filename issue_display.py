@@ -1,5 +1,4 @@
 from colors import *
-import textwrap
 import requests
 from utils import *
 from repo_display import *
@@ -18,7 +17,7 @@ class IssueDisplayObjectFactory:
             issue_info = requests.get(issue_url + "/{}".format(issues)).json()
             if not issue_info:
                 return NoIssueDisplayObject()
-            return SingleIssueDisplayObject(issue_info)
+            return SingleLongIssueDisplayObject(issue_info)
 
 
 class NoIssueDisplayObject(DisplayObject):
@@ -34,9 +33,25 @@ class MultipleIssueDisplayObject(DisplayObject):
         super().__init__(data)
 
     def display(self):
-        print(self.data)
         for issue in self.data:
             SingleIssueDisplayObject(issue).display()
+            putln(black, '=' * CONSOLE_WIDTH)
+            nl()
+
+
+class SingleLongIssueDisplayObject(DisplayObject):
+    def __init__(self, issue_data):
+        super().__init__(issue_data)
+
+    def display(self):
+        SingleIssueDisplayObject(self.data).display()
+        puts('  ')
+        putln(uline + bold, 'Body:')
+        clear()
+        body = self.data['body']
+        LongTextDisplayObject(body, CONSOLE_WIDTH - 4, 4).display(magenta)
+        clear()
+        nl()
 
 
 class SingleIssueDisplayObject(DisplayObject):
@@ -49,7 +64,6 @@ class SingleIssueDisplayObject(DisplayObject):
         number = issue['number']
         state = issue['state']
         comments = issue['comments']
-        body = issue['body']
         created = formatted_time(issue['created_at'])
         updated = formatted_time(issue['updated_at'])
         puts(bold, "  #{}: ".format(number))
@@ -65,12 +79,4 @@ class SingleIssueDisplayObject(DisplayObject):
         puts(bold, '  Updated: ')
         putln(green, updated)
         clear()
-        nl()
-        puts('  ')
-        putln(uline + bold, 'Body:')
-        clear()
-        puts(black, textwrap.indent('\n'.join(textwrap.wrap(body)), '    '))
-        clear()
-        nl()
-        putln(black, '=' * CONSOLE_WIDTH)
         nl()

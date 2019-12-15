@@ -1,6 +1,5 @@
 from colors import *
 from utils import *
-import textwrap
 import requests
 from repo_display import *
 from display import *
@@ -20,7 +19,7 @@ class CommitDisplayFactory:
                 "{}/{}".format(commits_url, commit)).json()
             if not commit_info:
                 return NoCommitDisplayObject()
-            return SingleCommitDisplayObject(commit_info)
+            return SingleLongCommitDisplayObject(commit_info)
 
 
 class NoCommitDisplayObject(DisplayObject):
@@ -29,6 +28,22 @@ class NoCommitDisplayObject(DisplayObject):
 
     def display(self):
         print(bold, "No commits.")
+
+
+class SingleLongCommitDisplayObject(DisplayObject):
+    def __init__(self, issue_data):
+        super().__init__(issue_data)
+
+    def display(self):
+        SingleCommitDisplayObject(self.data).display()
+        nl()
+        putln(bold, '  Message: ')
+        clear()
+        message = self.data['commit']['message']
+        LongTextDisplayObject(message, CONSOLE_WIDTH - 4, 4).display(magenta)
+        clear()
+        putln(black, '=' * CONSOLE_WIDTH)
+        nl()
 
 
 class SingleCommitDisplayObject(DisplayObject):
@@ -45,7 +60,6 @@ class SingleCommitDisplayObject(DisplayObject):
         commit_committer_email = commit['commit']['committer']['email']
         commit_committer_date = commit['commit']['committer']['date']
         url = commit['html_url']
-        message = commit['commit']['message']
         puts(bold + uline, 'Commit: {}'.format(sha))
         clear()
         nl()
@@ -60,16 +74,9 @@ class SingleCommitDisplayObject(DisplayObject):
             commit_committer, commit_committer_email, commit_committer_date))
         clear()
         nl()
-        putln(bold, '  Message: ')
-        puts(black, textwrap.indent('\n'.join(textwrap.wrap(message)), '    '))
-        clear()
-        nl()
-        nl()
         puts(bold, '  URL: ')
         putln(green + uline, url)
         clear()
-        putln(black, '=' * CONSOLE_WIDTH)
-        nl()
 
 
 class MultipleCommitDisplayObject(DisplayObject):
@@ -79,3 +86,6 @@ class MultipleCommitDisplayObject(DisplayObject):
     def display(self):
         for commit in self.data:
             SingleCommitDisplayObject(commit).display()
+            putln(black, '=' * CONSOLE_WIDTH)
+            nl()
+            clear()

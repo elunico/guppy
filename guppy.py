@@ -2,7 +2,6 @@
 
 import sys
 import requests
-import textwrap
 import argparse
 from colors import *
 from utils import *

@@ -1,7 +1,6 @@
 from utils import *
 from colors import *
 import requests
-import textwrap
 import argparse
 from display import *
 from issue_display import *
@@ -81,13 +80,7 @@ class RepoExtraInfoDisplayObject(DisplayObject):
         if not desc:
             putln(magenta, 'No description.')
         else:
-            putln(
-                magenta,
-                textwrap.indent(
-                    '\n'.join(textwrap.wrap(
-                        desc, width=CONSOLE_WIDTH - 2)), '  '
-                )
-            )
+            LongTextDisplayObject(desc, CONSOLE_WIDTH - 2, 2).display(magenta)
         clear()
 
 
