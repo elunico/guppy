@@ -27,7 +27,7 @@ def clear():
 
 
 def color_for_license(license):
-    if license['spdx_id'] in ['GPL-2.0', 'GPL-2.1', 'WTFPL', 'MIT']:
+    if license['key'] in ['mit', 'unlicense', 'wtfpl', 'gpl-2.0', 'lgpl-2.1', 'mpl-2.0', 'apache-2.0']:
         return green
     else:
         return yellow
