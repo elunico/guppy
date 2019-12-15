@@ -30,6 +30,10 @@ For repositories
 
 more options may be added in the future
 
+## Example
+
+`python3 guppy.py repo elunico/guppy -c all`
+
 ## IMPORTANT!!
 
 Unauthetincated requests using GitHub's API are limited to 60 per hour. Currently, this tool interfaces directly with the GitHub API in an unathenticated way. This will change later but for now keep this in mind as you use this tool. Your IP address will be cut off from `api.github.com` after 60 requests within an hour.
