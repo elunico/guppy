@@ -6,6 +6,7 @@ import argparse
 from display import *
 from issue_display import *
 from commit_display import *
+import dateutil.parser
 
 
 class RepoInfoDisplayObject(DisplayObject):
@@ -20,10 +21,10 @@ class RepoInfoDisplayObject(DisplayObject):
         desc = self.repo_info['description']
 
         print("~*~*~*~* G I T H U B    C O N S O L E *~*~*~*~".center(CONSOLE_WIDTH))
-        boxed(name)
+        boxed(source)
         nl()
-        puts(bold, "Under: ")
-        puts(black, source)
+        puts(bold, "Name: ")
+        puts(black, name)
         nl()
         puts(bold, "Link: ")
         puts(blue + uline, find_at)
@@ -62,6 +63,7 @@ class RepoExtraInfoDisplayObject(DisplayObject):
     def display(self):
         repo_info = self.data
         desc = repo_info['description']
+        updated = formatted_time(repo_info['updated_at'])
         clear()
         nl()
         license = repo_info['license']
@@ -72,6 +74,9 @@ class RepoExtraInfoDisplayObject(DisplayObject):
             puts(color_for_license(license), " ({})".format(spdxid))
             clear()
             nl()
+        puts(bold, 'Last Updated: ')
+        putln(green, updated)
+        clear()
         putln(bold, "Description:")
         if not desc:
             putln(magenta, 'No description.')

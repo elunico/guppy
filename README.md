@@ -32,7 +32,13 @@ more options may be added in the future
 
 ## Example
 
-`python3 guppy.py repo elunico/guppy -c all`
+`python3 guppy.py repo elunico/guppy`
+
+![Screenshot of example 1 command](/assets/issue-example.png?raw=true " ")
+
+`./guppy.py repo elunico/SocDraw -i 3`
+
+![Screenshot of example 2 command](/assets/repo-example.png?raw=true " ")
 
 ## IMPORTANT!!
 

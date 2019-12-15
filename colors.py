@@ -7,12 +7,14 @@ black = '\033[0m'
 bold = '\033[1m'
 uline = '\033[4m'
 
+from typing import List
 
-def puts(color, *msgs, sep=' '):
+
+def puts(color: str, *msgs: str, sep=' '):
     print("{}{}".format(color, sep.join(msgs)), end='')
 
 
-def putln(color, *msgs, sep=' '):
+def putln(color: str, *msgs: str, sep=' '):
     print("{}{}".format(color, sep.join(msgs)))
 
 

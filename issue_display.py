@@ -50,8 +50,8 @@ class SingleIssueDisplayObject(DisplayObject):
         state = issue['state']
         comments = issue['comments']
         body = issue['body']
-        created = issue['created_at']
-        updated = issue['updated_at']
+        created = formatted_time(issue['created_at'])
+        updated = formatted_time(issue['updated_at'])
         puts(bold, "  #{}: ".format(number))
         puts(bold, title)
         clear()
@@ -63,7 +63,7 @@ class SingleIssueDisplayObject(DisplayObject):
         putln(yellow, created)
         clear()
         puts(bold, '  Updated: ')
-        putln(blue, updated)
+        putln(green, updated)
         clear()
         nl()
         puts('  ')
@@ -74,10 +74,3 @@ class SingleIssueDisplayObject(DisplayObject):
         nl()
         putln(black, '=' * CONSOLE_WIDTH)
         nl()
-
-
-# def info_repo_issue(repo_info, issues):
-#     RepoInfoDisplayObject(repo_info).display()
-
-#     putln(bold + uline, 'Issues in Repo:')
-#     clear()

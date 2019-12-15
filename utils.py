@@ -1,6 +1,7 @@
 import os
 import subprocess
 import sys
+import dateutil.parser
 
 user_url = 'https://api.github.com/users/{user}'
 usr_repos_url = 'https://api.github.com/users/{user}/{repo}'
@@ -27,3 +28,8 @@ def boxed(msg, center=CONSOLE_WIDTH - 4):
     print('-' * size)
     print("| {} |".format(msg))
     print('-' * size)
+
+
+def formatted_time(isotime, localeString="%A, %B %d, %Y at %I:%M%P"):
+    dt = dateutil.parser.parse(isotime)
+    return dt.strftime(localeString)
