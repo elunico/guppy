@@ -24,11 +24,12 @@ except (IndexError, ValueError, AttributeError):
 
 
 def boxed(msg, center=CONSOLE_WIDTH - 4):
-    msg = msg.center(center)
-    size = len(msg) + 4
-    print('-' * size)
-    print("| {} |".format(msg))
-    print('-' * size)
+    items = msg.splitlines()
+    print('-' * CONSOLE_WIDTH)
+    for line in items:
+        line = line.center(center)
+        print("| {} |".format(line))
+    print('-' * CONSOLE_WIDTH)
 
 
 def formatted_time(isotime, localeString="%A, %B %d, %Y at %I:%M%P %Z"):

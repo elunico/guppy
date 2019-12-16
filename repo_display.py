@@ -14,23 +14,33 @@ class RepoInfoDisplayObject(DisplayObject):
         self.repo_info = repo_info
         self.titler = titler
 
+    def get_title(self):
+        title = self.repo_info['full_name']
+        if self.repo_info['fork'] and 'parent' in self.repo_info and 'full_name' in self.repo_info['parent']:
+            origin = self.repo_info['parent']['full_name']
+            title += '\n[forked from: {}]'.format(origin)
+        elif self.repo_info['fork']:
+            title += ' {}[fork]{}'.format(magenta, black)
+        return title
+
     def display(self):
         name = self.repo_info['name']
-        source = self.repo_info['full_name']
         find_at = self.repo_info['html_url']
         desc = self.repo_info['description']
 
-        self.titler.show_title(source)
-        if self.repo_info['private']:
-            putln(red, '[private]')
-        else:
-            putln(green, '[public]')
-        clear()
+        self.titler.show_title(self.get_title())
+
         puts(bold, "Name: ")
         puts(black, name)
         nl()
         puts(bold, "Link: ")
         puts(blue + uline, find_at)
+        nl()
+        clear()
+        if self.repo_info['private']:
+            putEntry('Visibility', 'private', valueColor=red)
+        else:
+            putEntry('Visibility', 'public', valueColor=green)
         clear()
         nl()
 
@@ -91,6 +101,7 @@ class RepoExtraInfoDisplayObject(DisplayObject):
             nl()
             nl()
         open_issues_count = repo_info['open_issues']
+
         putEntry('Open Issues', commify(open_issues_count))
         putEntry('Forks', commify(repo_info['forks']))
         putEntry('Watchers', commify(repo_info['watchers']))
