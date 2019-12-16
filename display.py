@@ -19,7 +19,13 @@ class LongTextDisplayObject(DisplayObject):
         self.places = places
 
     def wrap(self, string):
-        return '\n'.join(textwrap.wrap(string, width=self.width))
+
+        return '\n'.join(
+            ['\n'.join(textwrap.wrap(line, self.width))
+                for line in string.split('\n') if line.strip()]
+        )
+
+        # return '\n'.join(textwrap.wrap(string, width=self.width))
 
     def indent(self, string, places):
         return textwrap.indent(string, ' ' * places)
