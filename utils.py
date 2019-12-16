@@ -2,6 +2,7 @@ import os
 import subprocess
 import sys
 import dateutil.parser
+from colors import *
 
 user_url = 'https://api.github.com/users/{user}'
 usr_repos_url = 'https://api.github.com/users/{user}/{repo}'
@@ -33,3 +34,15 @@ def boxed(msg, center=CONSOLE_WIDTH - 4):
 def formatted_time(isotime, localeString="%A, %B %d, %Y at %I:%M%P %Z"):
     dt = dateutil.parser.parse(isotime)
     return dt.strftime(localeString)
+
+
+def response_check(data, requested):
+    if 'message' in data:
+        if data['message'] == 'Not Found':
+            putln(red, '`{}` not found!'.format(requested))
+            clear()
+            return
+        else:
+            putln(red, 'Error: {}'.format(data['message']))
+            clear()
+            return

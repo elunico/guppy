@@ -9,9 +9,10 @@ import dateutil.parser
 
 
 class RepoInfoDisplayObject(DisplayObject):
-    def __init__(self, repo_info):
+    def __init__(self, repo_info, titler=BoxedTitleDisplayer()):
         super().__init__(repo_info)
         self.repo_info = repo_info
+        self.titler = titler
 
     def display(self):
         name = self.repo_info['name']
@@ -19,9 +20,12 @@ class RepoInfoDisplayObject(DisplayObject):
         find_at = self.repo_info['html_url']
         desc = self.repo_info['description']
 
-        title()
-        boxed(source)
-        nl()
+        self.titler.show_title(source)
+        if self.repo_info['private']:
+            putln(red, '[private]')
+        else:
+            putln(green, '[public]')
+        clear()
         puts(bold, "Name: ")
         puts(black, name)
         nl()
@@ -43,15 +47,26 @@ class RepoLanguageInfoDisplayObject(DisplayObject):
             longest_lang = max([len(lang) for (lang, lines) in langs.items()])
         except ValueError:
             longest_lang = 2
-        langs = {k: ((v / total) * 100) for (k, v) in langs.items()}
+        lang_percents = {k: ((v / total) * 100) for (k, v) in langs.items()}
         clear()
         nl()
-        putln(bold + uline, 'Languages in Repo:')
+        putln(bold + uline, 'Major Languages in Repo:')
         clear()
-        for (k, v) in langs.items():
+        for (k, v) in lang_percents.items():
+            if v < 0.1:
+                break
             puts(bold, ("  {:>%d}: " % longest_lang).format(k))
-            puts(black, "{:.1f}%".format(v))
+            puts(black, "{:2.1f}% ({})".format(v, fmt_bytes(langs[k])))
             nl()
+        additional = []
+        for (k, v) in lang_percents.items():
+            if v < 0.1:
+                additional.append(k)
+        if additional:
+            nl()
+            putln(bold + uline, "Additional languages (< 0.1%): ")
+            LongTextDisplayObject(', '.join(additional),
+                                  CONSOLE_WIDTH - 2, 2).display()
 
 
 class RepoExtraInfoDisplayObject(DisplayObject):
@@ -63,6 +78,7 @@ class RepoExtraInfoDisplayObject(DisplayObject):
         repo_info = self.data
         desc = repo_info['description']
         updated = formatted_time(repo_info['updated_at'])
+        putEntry('Last Updated', updated, valueColor=green)
         clear()
         nl()
         license = repo_info['license']
@@ -73,8 +89,12 @@ class RepoExtraInfoDisplayObject(DisplayObject):
             puts(color_for_license(license), " ({})".format(spdxid))
             clear()
             nl()
-        puts(bold, 'Last Updated: ')
-        putln(green, updated)
+            nl()
+        open_issues_count = repo_info['open_issues']
+        putEntry('Open Issues', commify(open_issues_count))
+        putEntry('Forks', commify(repo_info['forks']))
+        putEntry('Watchers', commify(repo_info['watchers']))
+        nl()
         clear()
         putln(bold, "Description:")
         if not desc:
@@ -100,6 +120,7 @@ def info_repo(*clas):
     user, repo = options.repo.split('/')
     req = requests.get(repo_url.format(user=user, repo=repo))
     repo_info = req.json()
+    # TODO: replace with response_check
     if 'message' in repo_info:
         if repo_info['message'] == 'Not Found':
             putln(red, 'Repo `{}` for user `{}` not found!'.format(repo, user))
@@ -111,15 +132,18 @@ def info_repo(*clas):
             return
 
     if options.issues is False and options.commits is False:
+        program_name()
         RepoInfoDisplayObject(repo_info).display()
         RepoExtraInfoDisplayObject(repo_info).display()
         RepoLanguageInfoDisplayObject(repo_info).display()
     elif options.issues:
+        program_name()
         RepoInfoDisplayObject(repo_info).display()
         nl()
         o = IssueDisplayObjectFactory.forIssue(
             options.issues, repo_info['issues_url'][:-9]).display()
     elif options.commits:
+        program_name()
         RepoInfoDisplayObject(repo_info).display()
         nl()
         o = CommitDisplayFactory.forCommit(

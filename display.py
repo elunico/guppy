@@ -29,5 +29,34 @@ class LongTextDisplayObject(DisplayObject):
         clear()
 
 
-def title():
+class TitleDisplayer:
+    def show_title(self, string):
+        raise NotImplementedError('Abstract Class')
+
+
+class BoxedTitleDisplayer(TitleDisplayer):
+    def show_title(self, string):
+        boxed(string)
+
+
+class PlainTitleDisplayer(TitleDisplayer):
+    def show_title(self, string):
+        putln(bold, string)
+
+
+def program_name():
     print("~*~*~*~* G I T H U B    C O N S O L E *~*~*~*~".center(CONSOLE_WIDTH))
+
+
+def commify(numberText: str) -> str:
+    return '{:,}'.format(numberText)
+
+
+def fmt_bytes(bytes: int) -> str:
+    if bytes > 1000000000:
+        return '{:.2f} GB'.format(bytes / 1000000000)
+    if bytes > 1000000:
+        return '{:.2f} MB'.format(bytes / 1000000)
+    if bytes > 1000:
+        return '{:.2f} KB'.format(bytes / 1000)
+    return "{} B".format(bytes)

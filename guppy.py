@@ -16,11 +16,16 @@ def dispatch():
         return
     elif sys.argv[1] == 'help':
         print(usage)
-        print(
-            '{} user USER: retrieve information for USER. Use `user -h` for more information'.format(sys.argv[0]))
-        print(
-            '{} repo USER/REPO: retrieve information about REPO. Note that it must be qualified by a username. Use `repo -h` for more information'.format(sys.argv[0]))
-        print('{} help: print this message'.format(sys.argv[0]))
+        nl()
+        LongTextDisplayObject('{0}{1} user USER{2}: retrieve information for USER. Use `user -h` for more information'.format(
+            bold, sys.argv[0], black), CONSOLE_WIDTH - 2, 2).display()
+        nl()
+        LongTextDisplayObject('{0}{1} repo USER/REPO{2}: retrieve information about REPO. Note that it must be qualified by a username. Use `repo -h` for more information'.format(
+            bold, sys.argv[0], black), CONSOLE_WIDTH - 2, 2).display()
+        nl()
+        print('  {}{} help{}: print this message'.format(
+            bold, sys.argv[0], black))
+        nl()
     elif sys.argv[1] == 'user':
         if len(sys.argv) < 3:
             print("Error must specify USER for user mode")

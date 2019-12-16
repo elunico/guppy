@@ -3,6 +3,7 @@ import requests
 from utils import *
 from colors import *
 from display import *
+from repo_display import RepoInfoDisplayObject
 
 
 def parse_repo_args(args):
@@ -20,38 +21,35 @@ def parse_repo_args(args):
     return parser.parse_args(args)
 
 
+
+
 def info_user(*clas):
     options = parse_repo_args(clas)
     user = options.user
     req = requests.get(user_url.format(user=user))
     user_info = req.json()
-    if 'message' in user_info:
-        if user_info['message'] == 'Not Found':
-            putln(red, 'User `{}` not found!'.format(user))
-            clear()
-            return
-        else:
-            putln(red, 'Error: {}'.format(user_info['message']))
-            clear()
-            return
+    response_check(user_info, user)
 
     if options.repos is False and options.gists is False and options.followers is False and options.following is False:
-        title()
+        program_name()
         UserInfoDisplayObject(user_info).display()
         nl()
         UserExtraInfoDisplayObject(user_info).display()
     elif options.repos:
-        pass
-        # RepoInfoDisplayObject(user_info).display()
-        # nl()
-        # o = IssueDisplayObjectFactory.forIssue(
-        #     options.issues, user_info['issues_url'][:-9]).display()
+        program_name()
+        UserInfoDisplayObject(user_info).display()
+        nl()
+        data = requests.get(user_info['repos_url']).json()
+        response_check(data, 'repos')
+        o = UserReposDisplayObject(data).display()
     elif options.gists:
-        pass
-        # RepoInfoDisplayObject(user_info).display()
-        # nl()
-        # o = CommitDisplayFactory.forCommit(
-        #     options.commits, user_info['commits_url'][:-6]).display()
+        program_name()
+        UserInfoDisplayObject(user_info).display()
+        nl()
+        data = requests.get(user_info['gists_url'][:-10]).json()
+        response_check(data, 'gists')
+        print(data)
+        o = UserReposDisplayObject(data).display()
     elif options.following:
         pass
     elif options.followers:
@@ -59,11 +57,13 @@ def info_user(*clas):
 
 
 class UserInfoDisplayObject(DisplayObject):
-    def __init__(self, user_data):
+    def __init__(self, user_data, titler=BoxedTitleDisplayer()):
         super().__init__(user_data)
+        self.titler = titler
 
     def display(self):
-        boxed("{} (@{})".format(self.data['name'], self.data['login']))
+        self.titler.show_title("{} (@{})".format(
+            self.data['name'], self.data['login']))
         putEntry('URL', self.data['html_url'], valueColor=blue)
 
 
@@ -83,8 +83,32 @@ class UserExtraInfoDisplayObject(DisplayObject):
             putEntry('Website', 'https://' +
                      self.data['blog'], valueColor=blue)
             nl()
-        putEntry('Number of (public) repos', self.data['public_repos'])
-        putEntry('Number of (public) gists', self.data['public_gists'])
+        putEntry('Number of (public) repos',
+                 commify(self.data['public_repos']))
+        putEntry('Number of (public) gists',
+                 commify(self.data['public_gists']))
         nl()
-        putEntry('Followers', self.data['followers'])
-        putEntry('Following', self.data['following'])
+        putEntry('Followers', commify(self.data['followers']))
+        putEntry('Following', commify(self.data['following']))
+
+
+class UserReposDisplayObject(DisplayObject):
+    def __init__(self, repos_data):
+        super().__init__(repos_data)
+
+    def display(self):
+        for repo_data in self.data:
+            RepoInfoDisplayObject(repo_data, PlainTitleDisplayer()).display()
+            putln('=' * CONSOLE_WIDTH)
+            nl()
+
+
+class UserGistsDisplayObject(DisplayObject):
+    def __init__(self, gists_data):
+        super().__init__(gists_data)
+
+    def display(self):
+        for repo_data in self.data:
+            RepoInfoDisplayObject(repo_data, PlainTitleDisplayer()).display()
+            putln('=' * CONSOLE_WIDTH)
+            nl()
