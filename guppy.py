@@ -10,7 +10,6 @@ from user_display import *
 
 
 def dispatch():
-    # todo: formatting help messages: use colors and indent/wrap
     if len(sys.argv) < 2:
         print(usage)
         return
