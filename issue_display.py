@@ -3,21 +3,55 @@ import requests
 from utils import *
 from repo_display import *
 from display import *
+import re
+
+MAX_ISSUE_PAGES = 5
+
+
+def get_max_issue_pages(url):
+    issue_req = requests.get(url)
+    last_page = max(int(i) for i in re.findall(
+        r'\?page=(\d+)', issue_req.headers['Link']))
+
+    return last_page > MAX_ISSUE_PAGES, list(range(1, last_page + 1))
+
+
+def get_all_issue_data_pages(pages_list, issue_url):
+    all_issues = []
+    for page in pages_list:
+        issue_req = requests.get(
+            issue_url + "?page={}".format(page))
+        issue_info = issue_req.json()
+        if not issue_info:
+            raise NotImplementedError("Need to do this")
+        all_issues.extend(issue_info)
+    return all_issues
 
 
 class IssueDisplayObjectFactory:
     @staticmethod
     def forIssue(issues, issue_url):
         if issues == 'all':
-            issue_info = requests.get(issue_url).json()
-            if not issue_info:
+            (overflow, pages_list) = get_max_issue_pages(issue_url)
+            if overflow:
+                putln(
+                    yellow, "Warning: only first {} pages of {} total pages of issues will be shown. Use -i pNUMBER to see other pages".format(MAX_ISSUE_PAGES, pages_list[-1]))
+                pages_list = list(range(1, MAX_ISSUE_PAGES + 1))
+            all_issues = get_all_issue_data_pages(pages_list, issue_url)
+            if not all_issues:
                 return NoIssueDisplayObject()
-            return MultipleIssueDisplayObject(issue_info)
+            return MultipleIssueDisplayObject(all_issues)
         else:
-            issue_info = requests.get(issue_url + "/{}".format(issues)).json()
-            if not issue_info:
-                return NoIssueDisplayObject()
-            return SingleLongIssueDisplayObject(issue_info)
+            if 'p' in issues:
+                pages = parse_pages(issues)
+                all_issues = get_all_issue_data_pages(pages, issue_url)
+                return MultipleIssueDisplayObject(all_issues)
+            else:
+                issue_info = requests.get(
+                    issue_url + "/{}".format(issues)).json()
+                if not issue_info:
+                    return NoIssueDisplayObject()
+                return SingleLongIssueDisplayObject(issue_info)
 
 
 class NoIssueDisplayObject(DisplayObject):

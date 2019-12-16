@@ -46,3 +46,21 @@ def response_check(data, requested):
             putln(red, 'Error: {}'.format(data['message']))
             clear()
             return
+
+
+def expand_range(rangeString):
+    s, e = [int(i) for i in rangeString.split('-')]
+    return list(range(s, e + 1))
+
+
+def parse_pages(pagesString):
+    assert pagesString[0] == 'p'
+    pagesString = pagesString[1:]
+    each = pagesString.split(',')
+    pages = []
+    for i in each:
+        if '-' in i:
+            pages.extend(expand_range(i))
+        else:
+            pages.append(int(i))
+    return pages
