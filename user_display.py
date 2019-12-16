@@ -28,7 +28,8 @@ def info_user(*clas):
     user = options.user
     req = requests.get(user_url.format(user=user))
     user_info = req.json()
-    response_check(user_info, user)
+    if not response_check(user_info, user):
+        return
 
     if options.repos is False and options.gists is False and options.followers is False and options.following is False:
         program_name()
@@ -40,14 +41,16 @@ def info_user(*clas):
         UserInfoDisplayObject(user_info).display()
         nl()
         data = requests.get(user_info['repos_url']).json()
-        response_check(data, 'repos')
+        if not response_check(data, 'repos'):
+            return
         o = UserReposDisplayObject(data).display()
     elif options.gists:
         program_name()
         UserInfoDisplayObject(user_info).display()
         nl()
         data = requests.get(user_info['gists_url'][:-10]).json()
-        response_check(data, 'gists')
+        if not response_check(data, 'gists'):
+            return 
         print(data)
         o = UserReposDisplayObject(data).display()
     elif options.following:

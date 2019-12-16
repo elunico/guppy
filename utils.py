@@ -42,11 +42,13 @@ def response_check(data, requested):
         if data['message'] == 'Not Found':
             putln(red, '`{}` not found!'.format(requested))
             clear()
-            return
+            
         else:
             putln(red, 'Error: {}'.format(data['message']))
             clear()
-            return
+            
+        return False
+    return True 
 
 
 def expand_range(rangeString):
