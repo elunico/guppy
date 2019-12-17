@@ -13,7 +13,7 @@ def dispatch():
     if len(sys.argv) < 2:
         print(usage)
         return
-    elif sys.argv[1] == 'help':
+    elif sys.argv[1].lower() == 'help':
         print(usage)
         nl()
         LongTextDisplayObject('{0}{1} user USER{2}: retrieve information for USER. Use `user -h` for more information'.format(
@@ -25,12 +25,12 @@ def dispatch():
         print('  {}{} help{}: print this message'.format(
             bold, sys.argv[0], black))
         nl()
-    elif sys.argv[1] == 'user':
+    elif sys.argv[1].lower() == 'user':
         if len(sys.argv) < 3:
             print("Error must specify USER for user mode")
             return
         info_user(*sys.argv[2:])
-    elif sys.argv[1] == 'repo':
+    elif sys.argv[1].lower() == 'repo':
         if len(sys.argv) < 3:
             print("Error must specify USER/REPO for repo mode")
             return

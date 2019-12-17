@@ -10,8 +10,8 @@ MAX_ISSUE_PAGES = 5
 
 def get_max_issue_pages(url):
     issue_req = requests.get(url)
-    last_page = max(int(i) for i in re.findall(
-        r'\?page=(\d+)', issue_req.headers['Link']))
+    last_page = max((int(i) for i in re.findall(
+        r'\?page=(\d+)', issue_req.headers.get('Link', ''))), default=0)
 
     return last_page > MAX_ISSUE_PAGES, list(range(1, last_page + 1))
 
@@ -23,7 +23,7 @@ def get_all_issue_data_pages(pages_list, issue_url):
             issue_url + "?page={}".format(page))
         issue_info = issue_req.json()
         if not issue_info:
-            raise NotImplementedError("Need to do this")
+            return []
         all_issues.extend(issue_info)
     return all_issues
 
@@ -45,6 +45,8 @@ class IssueDisplayObjectFactory:
             if 'p' in issues:
                 pages = parse_pages(issues)
                 all_issues = get_all_issue_data_pages(pages, issue_url)
+                if not all_issues:
+                    return NoIssueDisplayObject()
                 return MultipleIssueDisplayObject(all_issues)
             else:
                 issue_info = requests.get(

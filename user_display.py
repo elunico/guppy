@@ -10,17 +10,15 @@ def parse_repo_args(args):
     parser = argparse.ArgumentParser()
     parser.add_argument(
         'user', help='The user to get information on.')
-    parser.add_argument('-r', '--repos', default=False,
-                        help='List all repos for the user using `all` or a specific issue using `-r NAME`')
+    parser.add_argument('-r', '--repos', default=False, action='store_true',
+                        help='List all repos for the user. To list a specific repo, use the `repo` action instead of `user` action')
     parser.add_argument('-g', '--gists', default=False,
                         help='List all gists for the user using `all` or a specific commit using `-g GIST`')
-    parser.add_argument('--followers', default=False,
-                        help='List all followers for the user')
-    parser.add_argument('--following', default=False,
-                        help='List all following for the user')
+    parser.add_argument('--followers', default=False, action='store_true',
+                        help='List all followers for the user. To see a specific follower use the `user` option and their handle')
+    parser.add_argument('--following', default=False, action='store_true',
+                        help='List all following for the user. To see a specific following use the `user` option and their handle')
     return parser.parse_args(args)
-
-
 
 
 def info_user(*clas):
@@ -50,7 +48,7 @@ def info_user(*clas):
         nl()
         data = requests.get(user_info['gists_url'][:-10]).json()
         if not response_check(data, 'gists'):
-            return 
+            return
         print(data)
         o = UserReposDisplayObject(data).display()
     elif options.following:
@@ -83,7 +81,7 @@ class UserExtraInfoDisplayObject(DisplayObject):
                 bio, CONSOLE_WIDTH - 2, 2).display(magenta)
             nl()
         if self.data['blog']:
-            putEntry('Website', 'https://' +
+            putEntry('Website',
                      self.data['blog'], valueColor=blue)
             nl()
         putEntry('Number of (public) repos',
