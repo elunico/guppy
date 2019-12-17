@@ -1,5 +1,7 @@
 # Guppy
 
+`[active development]`
+
 Guppy is a tool for getting information about GitHub repos and users on the command line.
 
 It is named guppy for two reasons. 1) guppy ends in py and guppy is written in Python. 2) It is a play on GitHub-y (a reach maybe).
@@ -53,3 +55,7 @@ Also keep in mind that one run of the program may result in **mutliple requests*
 to retrieve all commits requires getting the repo information and the commit information. The
 regular screen for information on a repo requires a request to get the repo information
 and the language information
+
+## Disclaimer
+
+This program is being actively developed and it is likely many things will change. Nothing about the command line options, access, input, or output should be expected to stay the same until development ends 
