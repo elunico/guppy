@@ -10,16 +10,23 @@ class CommitDisplayFactory:
     @staticmethod
     def forCommit(commit, commits_url):
         if commit == 'all':
-            commit_info = requests.get(commits_url).json()
-            if not commit_info:
+            all_commits = get_all_pages_warned(commits_url)
+            if not all_commits:
                 return NoCommitDisplayObject()
-            return MultipleCommitDisplayObject(commit_info)
+            return MultipleCommitDisplayObject(all_commits)
         else:
-            commit_info = requests.get(
-                "{}/{}".format(commits_url, commit)).json()
-            if not commit_info:
-                return NoCommitDisplayObject()
-            return SingleLongCommitDisplayObject(commit_info)
+            if 'p' in commit:
+                pages = parse_pages(commit)
+                all_commits = get_all_data_pages(pages, commits_url)
+                if not all_commits:
+                    return NoCommitDisplayObject()
+                return MultipleCommitDisplayObject(all_commits)
+            else:
+                commit_info = requests.get(
+                    "{}/{}".format(commits_url, commit)).json()
+                if not commit_info:
+                    return NoCommitDisplayObject()
+                return SingleLongCommitDisplayObject(commit_info)
 
 
 class NoCommitDisplayObject(DisplayObject):

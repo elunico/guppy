@@ -1,8 +1,12 @@
 import os
 import subprocess
 import sys
+import re
+import requests
 import dateutil.parser
 from colors import *
+
+MAX_PAGES = 5
 
 user_url = 'https://api.github.com/users/{user}'
 usr_repos_url = 'https://api.github.com/users/{user}/{repo}'
@@ -42,13 +46,13 @@ def response_check(data, requested):
         if data['message'] == 'Not Found':
             putln(red, '`{}` not found!'.format(requested))
             clear()
-            
+
         else:
             putln(red, 'Error: {}'.format(data['message']))
             clear()
-            
+
         return False
-    return True 
+    return True
 
 
 def expand_range(rangeString):
@@ -67,3 +71,34 @@ def parse_pages(pagesString):
         else:
             pages.append(int(i))
     return pages
+
+
+def get_max_pages(url):
+    issue_req = requests.get(url)
+    last_page = max((int(i) for i in re.findall(
+        r'\?page=(\d+)', issue_req.headers.get('Link', ''))), default=0)
+
+    return last_page > MAX_PAGES, list(range(1, last_page + 1))
+
+
+def get_all_data_pages(pages_list, base_url):
+    all_issues = []
+    for page in pages_list:
+        issue_req = requests.get(
+            base_url + "?page={}".format(page))
+        issue_info = issue_req.json()
+        if not issue_info:
+            return []
+        all_issues.extend(issue_info)
+    return all_issues
+
+
+def get_all_pages_warned(base_url):
+    (overflow, pages_list) = get_max_pages(base_url)
+    if overflow:
+        putln(yellow, "Warning: only first {} pages of {} total pages of "
+              "of data will be shown. Use -i pNUMBER to "
+              "see other pages".format(MAX_PAGES, pages_list[-1]))
+        pages_list = list(range(1, MAX_PAGES + 1))
+    all_issues = get_all_data_pages(pages_list, base_url)
+    return all_issues

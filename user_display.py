@@ -3,6 +3,7 @@ import requests
 from utils import *
 from colors import *
 from display import *
+from gists_display import *
 from repo_display import RepoInfoDisplayObject
 
 
@@ -10,14 +11,14 @@ def parse_repo_args(args):
     parser = argparse.ArgumentParser()
     parser.add_argument(
         'user', help='The user to get information on.')
-    parser.add_argument('-r', '--repos', default=False, action='store_true',
-                        help='List all repos for the user. To list a specific repo, use the `repo` action instead of `user` action')
+    parser.add_argument('-r', '--repos', default=False,
+                        help='List all repos for the user. List pages using -r p2,3,4-7 etc. syntax. To list a specific repo, use the `repo` action instead of `user` action')
     parser.add_argument('-g', '--gists', default=False,
-                        help='List all gists for the user using `all` or a specific commit using `-g GIST`')
-    parser.add_argument('--followers', default=False, action='store_true',
-                        help='List all followers for the user. To see a specific follower use the `user` option and their handle')
-    parser.add_argument('--following', default=False, action='store_true',
-                        help='List all following for the user. To see a specific following use the `user` option and their handle')
+                        help='List all gists for the user using `all` or a specific commit using `-g GIST`. Can also use page syntax as in -r')
+    parser.add_argument('--followers', default=False,
+                        help='List all followers for the user. Can also use page syntax as in -r. To see a specific follower use the `user` option and their handle')
+    parser.add_argument('--following', default=False,
+                        help='List all following for the user. Can also use page syntax as in -r. To see a specific following use the `user` option and their handle')
     return parser.parse_args(args)
 
 
@@ -38,23 +39,55 @@ def info_user(*clas):
         program_name()
         UserInfoDisplayObject(user_info).display()
         nl()
-        data = requests.get(user_info['repos_url']).json()
-        if not response_check(data, 'repos'):
-            return
-        o = UserReposDisplayObject(data).display()
+        # data = requests.get(user_info['repos_url']).json()
+        # if not response_check(data, 'repos'):
+        #     return
+        # o = UserMultipleReposDisplayObject(data).display()
+        UserReposDisplayObjectFactory.forRepos(
+            options.repos, user_info['repos_url']).display()
     elif options.gists:
         program_name()
         UserInfoDisplayObject(user_info).display()
         nl()
-        data = requests.get(user_info['gists_url'][:-10]).json()
-        if not response_check(data, 'gists'):
-            return
-        print(data)
-        o = UserReposDisplayObject(data).display()
+        # data = requests.get(user_info['gists_url'][:-10]).json()
+        # if not response_check(data, 'gists'):
+        #     return
+        # print(data)
+        # o = UserMultipleReposDisplayObject(data).display()
+        UserGistsDisplayObjectFactory.forGists(
+            options.gists, user_info['gists_url'][:-10]).display()
     elif options.following:
         pass
     elif options.followers:
         pass
+
+
+class NoReposDisplayObject(DisplayObject):
+    def __init__(self):
+        super().__init__({})
+
+    def display(self):
+        print(bold, "No repo found.")
+
+
+class UserReposDisplayObjectFactory:
+    @staticmethod
+    def forRepos(repos, repos_url):
+        if repos == 'all':
+            all_repos = get_all_pages_warned(repos_url)
+            if not all_repos:
+                return NoReposDisplayObject()
+            return UserMultipleReposDisplayObject(all_repos)
+        else:
+            if 'p' in repos:
+                pages = parse_pages(repos)
+                all_repos = get_all_data_pages(pages, repos_url)
+                if not all_repos:
+                    return NoReposDisplayObject()
+                return UserMultipleReposDisplayObject(all_repos)
+            else:
+                raise TypeError(
+                    'Examine a specific repo using the REPO option! Try python3 guppy.py HELP for more.')
 
 
 class UserInfoDisplayObject(DisplayObject):
@@ -93,7 +126,7 @@ class UserExtraInfoDisplayObject(DisplayObject):
         putEntry('Following', commify(self.data['following']))
 
 
-class UserReposDisplayObject(DisplayObject):
+class UserMultipleReposDisplayObject(DisplayObject):
     def __init__(self, repos_data):
         super().__init__(repos_data)
 
