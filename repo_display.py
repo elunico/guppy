@@ -8,6 +8,55 @@ from commit_display import *
 import dateutil.parser
 
 
+def parse_repo_args(args):
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        'repo', help='The repo to get information on. Must be in the form of USER/REPO')
+    parser.add_argument('-i', '--issues', default=False,
+                        help='List all issues on the repo using `all` or a specific issue using `-i NUMBER` or a specific page of issues using -i pNUMBER or -i pFROM-THROUGH or -i pPAGENO,PAGENO2,PAGENO3 or any combination of those. Pages will be returned in the order given and will NOT be sorted (Note all will not display more than 20 pages of issues)')
+    parser.add_argument('-c', '--commits', default=False,
+                        help='List all commits on the repo using `all` or a specific commit using `-c HASH`')
+    return parser.parse_args(args)
+
+
+def info_repo(*clas):
+    options = parse_repo_args(clas)
+    user, repo = options.repo.split('/')
+    req = requests.get(repo_url.format(user=user, repo=repo))
+    repo_info = req.json()
+
+    rate_limit_check(req)
+
+    # TODO: replace with response_check
+    if 'message' in repo_info:
+        if repo_info['message'] == 'Not Found':
+            putln(red, 'Repo `{}` for user `{}` not found!'.format(repo, user))
+            clear()
+            return
+        else:
+            putln(red, 'Error: {}'.format(repo_info['message']))
+            clear()
+            return
+
+    if options.issues is False and options.commits is False:
+        program_name()
+        RepoInfoDisplayObject(repo_info).display()
+        RepoExtraInfoDisplayObject(repo_info).display()
+        RepoLanguageInfoDisplayObject(repo_info).display()
+    elif options.issues:
+        program_name()
+        RepoInfoDisplayObject(repo_info).display()
+        nl()
+        o = IssueDisplayObjectFactory.forIssue(
+            options.issues, repo_info['issues_url'][:-9]).display()
+    elif options.commits:
+        program_name()
+        RepoInfoDisplayObject(repo_info).display()
+        nl()
+        o = CommitDisplayFactory.forCommit(
+            options.commits, repo_info['commits_url'][:-6]).display()
+
+
 class RepoInfoDisplayObject(DisplayObject):
     def __init__(self, repo_info, titler=BoxedTitleDisplayer()):
         super().__init__(repo_info)
@@ -115,52 +164,3 @@ class RepoExtraInfoDisplayObject(DisplayObject):
         else:
             LongTextDisplayObject(desc, CONSOLE_WIDTH - 2, 2).display(magenta)
         clear()
-
-
-def parse_repo_args(args):
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        'repo', help='The repo to get information on. Must be in the form of USER/REPO')
-    parser.add_argument('-i', '--issues', default=False,
-                        help='List all issues on the repo using `all` or a specific issue using `-i NUMBER` or a specific page of issues using -i pNUMBER or -i pFROM-THROUGH or -i pPAGENO,PAGENO2,PAGENO3 or any combination of those. Pages will be returned in the order given and will NOT be sorted (Note all will not display more than 20 pages of issues)')
-    parser.add_argument('-c', '--commits', default=False,
-                        help='List all commits on the repo using `all` or a specific commit using `-c HASH`')
-    return parser.parse_args(args)
-
-
-def info_repo(*clas):
-    options = parse_repo_args(clas)
-    user, repo = options.repo.split('/')
-    req = requests.get(repo_url.format(user=user, repo=repo))
-    repo_info = req.json()
-
-    rate_limit_check(req)
-
-    # TODO: replace with response_check
-    if 'message' in repo_info:
-        if repo_info['message'] == 'Not Found':
-            putln(red, 'Repo `{}` for user `{}` not found!'.format(repo, user))
-            clear()
-            return
-        else:
-            putln(red, 'Error: {}'.format(repo_info['message']))
-            clear()
-            return
-
-    if options.issues is False and options.commits is False:
-        program_name()
-        RepoInfoDisplayObject(repo_info).display()
-        RepoExtraInfoDisplayObject(repo_info).display()
-        RepoLanguageInfoDisplayObject(repo_info).display()
-    elif options.issues:
-        program_name()
-        RepoInfoDisplayObject(repo_info).display()
-        nl()
-        o = IssueDisplayObjectFactory.forIssue(
-            options.issues, repo_info['issues_url'][:-9]).display()
-    elif options.commits:
-        program_name()
-        RepoInfoDisplayObject(repo_info).display()
-        nl()
-        o = CommitDisplayFactory.forCommit(
-            options.commits, repo_info['commits_url'][:-6]).display()
