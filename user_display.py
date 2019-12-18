@@ -14,7 +14,7 @@ def parse_repo_args(args):
     parser.add_argument('-r', '--repos', default=False,
                         help='List all repos for the user. List pages using -r p2,3,4-7 etc. syntax. To list a specific repo, use the `repo` action instead of `user` action')
     parser.add_argument('-g', '--gists', default=False,
-                        help='List all gists for the user using `all` or a specific commit using `-g GIST`. Can also use page syntax as in -r')
+                        help='List all gists for the user using `all` or a specific gist using `-g GIST_ID`. Can also use page syntax as in -r')
     parser.add_argument('--followers', default=False,
                         help='List all followers for the user. Can also use page syntax as in -r. To see a specific follower use the `user` option and their handle')
     parser.add_argument('--following', default=False,
@@ -30,6 +30,8 @@ def info_user(*clas):
     if not response_check(user_info, user):
         return
 
+    rate_limit_check(req)
+
     if options.repos is False and options.gists is False and options.followers is False and options.following is False:
         program_name()
         UserInfoDisplayObject(user_info).display()
@@ -39,21 +41,10 @@ def info_user(*clas):
         program_name()
         UserInfoDisplayObject(user_info).display()
         nl()
-        # data = requests.get(user_info['repos_url']).json()
-        # if not response_check(data, 'repos'):
-        #     return
-        # o = UserMultipleReposDisplayObject(data).display()
         UserReposDisplayObjectFactory.forRepos(
             options.repos, user_info['repos_url']).display()
     elif options.gists:
         program_name()
-        UserInfoDisplayObject(user_info).display()
-        nl()
-        # data = requests.get(user_info['gists_url'][:-10]).json()
-        # if not response_check(data, 'gists'):
-        #     return
-        # print(data)
-        # o = UserMultipleReposDisplayObject(data).display()
         UserGistsDisplayObjectFactory.forGists(
             options.gists, user_info['gists_url'][:-10]).display()
     elif options.following:

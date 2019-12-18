@@ -6,6 +6,7 @@ import requests
 import dateutil.parser
 from colors import *
 
+
 MAX_PAGES = 5
 
 user_url = 'https://api.github.com/users/{user}'
@@ -41,10 +42,10 @@ def formatted_time(isotime, localeString="%A, %B %d, %Y at %I:%M%P %Z"):
     return dt.strftime(localeString)
 
 
-def response_check(data, requested):
+def response_check(data, requested='resource'):
     if 'message' in data:
         if data['message'] == 'Not Found':
-            putln(red, '`{}` not found!'.format(requested))
+            putln(red, 'Error: {} not found!'.format(requested))
             clear()
 
         else:
@@ -75,6 +76,9 @@ def parse_pages(pagesString):
 
 def get_max_pages(url):
     issue_req = requests.get(url)
+    assert('Link' in issue_req.headers)
+    if not response_check(issue_req):
+        return False, []
     last_page = max((int(i) for i in re.findall(
         r'\?page=(\d+)', issue_req.headers.get('Link', ''))), default=0)
 
@@ -86,6 +90,8 @@ def get_all_data_pages(pages_list, base_url):
     for page in pages_list:
         issue_req = requests.get(
             base_url + "?page={}".format(page))
+        if not response_check(issue_req):
+            return []
         issue_info = issue_req.json()
         if not issue_info:
             return []
@@ -102,3 +108,12 @@ def get_all_pages_warned(base_url):
         pages_list = list(range(1, MAX_PAGES + 1))
     all_issues = get_all_data_pages(pages_list, base_url)
     return all_issues
+
+
+def rate_limit_check(req):
+    if 'X-RateLimit-Remaining' in req.headers:
+        left = int(req.headers['X-RateLimit-Remaining'])
+        if left < 20:
+            putln(yellow + bold, 'Rate Limit Warning! {} requests left. Appox. {} - {} invocations remaining'.format(
+                left, int(left / 6), int(left / 2)))
+            clear()

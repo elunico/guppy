@@ -133,6 +133,9 @@ def info_repo(*clas):
     user, repo = options.repo.split('/')
     req = requests.get(repo_url.format(user=user, repo=repo))
     repo_info = req.json()
+
+    rate_limit_check(req)
+
     # TODO: replace with response_check
     if 'message' in repo_info:
         if repo_info['message'] == 'Not Found':
