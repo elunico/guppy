@@ -52,6 +52,8 @@ class RepoLanguageInfoDisplayObject(DisplayObject):
 
     def display(self):
         langs = requests.get(self.repo_info['languages_url']).json()
+        if not response_check(langs, 'languages'):
+            return
         total = sum([lines for (lang, lines) in langs.items()])
         try:
             longest_lang = max([len(lang) for (lang, lines) in langs.items()])
