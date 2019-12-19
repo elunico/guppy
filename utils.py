@@ -117,3 +117,19 @@ def rate_limit_check(req):
             putln(yellow + bold, 'Rate Limit Warning! {} requests left. Appox. {} - {} invocations remaining'.format(
                 left, int(left / 6), int(left / 2)))
             clear()
+
+
+if os.environ.get('DEBUG', False):
+
+    import inspect
+
+    def line():
+        return inspect.getframeinfo(inspect.currentframe()).lineno
+
+    def debug(msg, color=black):
+        print("{3}DEBUG: [{0}:{1}] {2}{4}".format(
+            __name__, line(), msg, color, black))
+else:
+    def line(): return ''
+
+    def debug(*args, **kwargs): pass

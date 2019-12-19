@@ -5,6 +5,7 @@ import argparse
 from display import *
 from issue_display import *
 from commit_display import *
+from caching import *
 import dateutil.parser
 
 
@@ -19,13 +20,54 @@ def parse_repo_args(args):
     return parser.parse_args(args)
 
 
+def fetch_repo_info(user, repo, url, caching=CACHING_ACTIVE):
+    if not caching:
+        req = requests.get(url.format(user=user, repo=repo))
+        repo_info = req.json()
+        rate_limit_check(req)
+        return repo_info
+    else:
+        cached = get_cached_repo("{};{}".format(user, repo))
+        if not cached:
+            debug('repo cache miss', yellow)
+            clear()
+            req = requests.get(url.format(user=user, repo=repo))
+            repo_info = req.json()
+            rate_limit_check(req)
+            cache_repo("{};{}".format(user, repo), repo_info)
+            return repo_info
+        else:
+            debug('repo cache hit', green)
+            clear()
+            return cached
+
+
+def fetch_repo_language(user, repo, url, caching=CACHING_ACTIVE):
+    if not caching:
+        req = requests.get(url.format(user=user, repo=repo))
+        lang_info = req.json()
+        rate_limit_check(req)
+        return lang_info
+    else:
+        cached = get_cached_language("{};{}".format(user, repo))
+        if not cached:
+            debug('repo language cache miss', yellow)
+            clear()
+            req = requests.get(url.format(user=user, repo=repo))
+            lang_info = req.json()
+            rate_limit_check(req)
+            cache_language("{};{}".format(user, repo), lang_info)
+            return lang_info
+        else:
+            debug('repo language cache hit', green)
+            clear()
+            return cached
+
+
 def info_repo(*clas):
     options = parse_repo_args(clas)
     user, repo = options.repo.split('/')
-    req = requests.get(repo_url.format(user=user, repo=repo))
-    repo_info = req.json()
-
-    rate_limit_check(req)
+    repo_info = fetch_repo_info(user, repo, repo_url)
 
     # TODO: replace with response_check
     if 'message' in repo_info:
@@ -100,7 +142,9 @@ class RepoLanguageInfoDisplayObject(DisplayObject):
         self.repo_info = repo_info
 
     def display(self):
-        langs = requests.get(self.repo_info['languages_url']).json()
+        user, repo = self.repo_info['full_name'].split('/')
+        langs = fetch_repo_language(
+            user, repo, self.repo_info['languages_url'])
         if not response_check(langs, 'languages'):
             return
         total = sum([lines for (lang, lines) in langs.items()])
