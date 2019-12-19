@@ -8,7 +8,11 @@ It is named guppy for two reasons. 1) guppy ends in py and guppy is written in P
 
 ## Dependencies
 
+*You can use `pip install -r requirements.txt` to install dependencies if you are using a virtualenv*
+
 - Guppy requires a `python3` installation. I used `3.6.0` to develop it so it should work on anything `3.6.0` or later. It will not work on `2` and it may work earlier than `3.6.0`.
+
+- Guppy requires `requests`. You can install it using `pip install requests` or `pip3` if you use `python3` 
 
 - Guppy also requires the `dateutil.parser` module. This might already be installed, but if it is not you can use `pip install python-dateutil` or `pip3 install python-dateutil` if you run python 3 with the `python3` command.
 
