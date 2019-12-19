@@ -9,14 +9,20 @@ class IssueDisplayObjectFactory:
     @staticmethod
     def forIssue(issues, issue_url):
         if issues == 'all':
-            all_issues = get_all_pages_warned(issue_url)
+            all_issues = []
+            all_issues_pages = get_all_pages_warned(issue_url)
+            for v in all_issues_pages.values():
+                all_issues.extend(v)
             if not all_issues:
                 return NoIssueDisplayObject()
             return MultipleIssueDisplayObject(all_issues)
         else:
             if 'p' in issues:
                 pages = parse_pages(issues)
-                all_issues = get_all_data_pages(pages, issue_url)
+                all_issues = []
+                all_issues_pages = get_all_data_pages(pages, issue_url)
+                for v in all_issues_pages.values():
+                    all_issues.extend(v)
                 if not all_issues:
                     return NoIssueDisplayObject()
                 return MultipleIssueDisplayObject(all_issues)

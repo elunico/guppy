@@ -2,6 +2,8 @@ import os.path
 import os
 import msgpack
 import time
+from colors import *
+from utils import *
 from typing import Union
 from typing import Optional
 from typing import Dict
@@ -90,10 +92,12 @@ def prune_max_size():
     global index
     entries = sorted(list(index.items()), key=lambda x: x[1])
     while get_cache_size() > MAX_CACHE_SIZE and len(entries) > 0:
-        path = str(entries.pop(0)[0], encoding='utf-8')
-        path = cacheTo(path)
+        path = cacheTo(entries.pop(0)[0])
         assert '.guppy' in path
-        os.remove(path)
+        try:
+            os.remove(path)
+        except FileNotFoundError:
+            debug('File {} in index but not found on delete. '.format(path), yellow)
 
     index = {k: v for (k, v) in entries}
 
@@ -102,7 +106,7 @@ def cache_language(qrepo: str, data: dict) -> int:
     prune_max_size()
     if '/' in qrepo:
         qrepo = qrepo.replace('/', '$')
-    path = 'repo:{}.lang'.format(qrepo)
+    path = 'repo.{}.lang'.format(qrepo)
     index[path] = time.time()
     with open(cacheTo(path), 'wb') as f:
         return f.write(serialize(data))
@@ -110,7 +114,7 @@ def cache_language(qrepo: str, data: dict) -> int:
 
 def cache_user(username: str, data: dict) -> int:
     prune_max_size()
-    path = 'user:{}'.format(username)
+    path = 'user.{}'.format(username)
     index[path] = time.time()
     with open(cacheTo(path), 'wb') as f:
         return f.write(serialize(data))
@@ -120,16 +124,66 @@ def cache_repo(qrepo: str, data: dict) -> int:
     prune_max_size()
     if '/' in qrepo:
         qrepo = qrepo.replace('/', '$')
-    path = 'repo:{}'.format(qrepo)
+    path = 'repo.{}'.format(qrepo)
     index[path] = time.time()
     with open(cacheTo(path), 'wb') as f:
         return f.write(serialize(data))
 
 
-def get_cached_language(qrepo: str) -> int:
+def cache_issue(qrepo: str, id: str, data: dict) -> int:
+    raise NotImplementedError()
+
+
+def cache_commit(qrepo: str, sha: str, data: dict) -> int:
+    raise NotImplementedError()
+
+
+def cache_repo_list(qrepo: str, list: str, page: str, data: list) -> int:
+    '''
+    `list` param should be issues or commits
+    '''
+    qrepo = qrepo.replace('/', '$')
+    prune_max_size()
+    path = 'repo.{}.{}.{}'.format(user, list, page)
+    index[path] = time.time()
+    with open(cacheTo(path), 'wb') as f:
+        return f.write(serialize(data))
+
+
+def cache_user_list(user: str, list: str, page: str, data: list) -> int:
+    '''
+    `list` param should be repos or gists
+    '''
+    prune_max_size()
+    path = 'user.{}.{}.{}'.format(user, list, page)
+    index[path] = time.time()
+    with open(cacheTo(path), 'wb') as f:
+        return f.write(serialize(data))
+
+
+def get_cached_user_list(user: str, list: str, page: str) -> Optional[list]:
+    '''
+    `list` param should be repos or gists
+    '''
+    path = 'user.{}.{}.{}'.format(user, list, page)
+    if os.path.exists(cacheTo(path)):
+        with open(cacheTo(path), 'rb') as f:
+            return unserialize(f.read())
+    return None
+
+
+def get_cached_issue(qrepo: str, id: str) -> int:
+    raise NotImplementedError()
+
+
+def get_cached_commit(qrepo: str, id: str) -> int:
+    raise NotImplementedError()
+
+
+def get_cached_language(qrepo: str) -> Optional[dict]:
     if '/' in qrepo:
         qrepo = qrepo.replace('/', '$')
-    path = 'repo:{}.lang'.format(qrepo)
+    path = 'repo.{}.lang'.format(qrepo)
     if os.path.exists(cacheTo(path)):
         with open(cacheTo(path), 'rb') as f:
             return unserialize(f.read())
@@ -137,7 +191,7 @@ def get_cached_language(qrepo: str) -> int:
 
 
 def get_cached_user(username: str) -> Optional[dict]:
-    path = 'user:{}'.format(username)
+    path = 'user.{}'.format(username)
     if os.path.exists(cacheTo(path)):
         with open(cacheTo(path), 'rb') as f:
             return unserialize(f.read())
@@ -147,7 +201,7 @@ def get_cached_user(username: str) -> Optional[dict]:
 def get_cached_repo(qrepo: str) -> Optional[dict]:
     if '/' in qrepo:
         qrepo = qrepo.replace('/', '$')
-    path = 'repo:{}'.format(qrepo)
+    path = 'repo.{}'.format(qrepo)
     if os.path.exists(cacheTo(path)):
         with open(cacheTo(path), 'rb') as f:
             return unserialize(f.read())
@@ -155,10 +209,14 @@ def get_cached_repo(qrepo: str) -> Optional[dict]:
 
 
 def clear_cache():
+    global index
     c = 0
     for file in os.listdir(cache_path):
-        os.remove(file)
+        os.remove(cacheTo(file))
         c += 1
+
+    index = {}
+    return c
 
 
 def cache_action(action: str):

@@ -85,14 +85,20 @@ class UserReposDisplayObjectFactory:
     @staticmethod
     def forRepos(repos, repos_url):
         if repos == 'all':
-            all_repos = get_all_pages_warned(repos_url)
+            all_repos = []
+            all_repos_pages = get_all_pages_warned(repos_url)
+            for v in all_repos_pages.values():
+                all_repos.extend(v)
             if not all_repos:
                 return NoReposDisplayObject()
             return UserMultipleReposDisplayObject(all_repos)
         else:
             if 'p' in repos:
                 pages = parse_pages(repos)
-                all_repos = get_all_data_pages(pages, repos_url)
+                all_repos = []
+                all_repos_pages = get_all_data_pages(pages, repos_url)
+                for v in all_repos_pages.values():
+                    all_repos.extend(v)
                 if not all_repos:
                     return NoReposDisplayObject()
                 return UserMultipleReposDisplayObject(all_repos)

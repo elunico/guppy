@@ -10,14 +10,20 @@ class CommitDisplayFactory:
     @staticmethod
     def forCommit(commit, commits_url):
         if commit == 'all':
-            all_commits = get_all_pages_warned(commits_url)
+            all_commits = []
+            all_commits_pages = get_all_pages_warned(commits_url)
+            for v in all_commits_pages.values():
+                all_commits.extend(v)
             if not all_commits:
                 return NoCommitDisplayObject()
             return MultipleCommitDisplayObject(all_commits)
         else:
             if 'p' in commit:
                 pages = parse_pages(commit)
-                all_commits = get_all_data_pages(pages, commits_url)
+                all_commits = []
+                all_commits_pages = get_all_data_pages(pages, commits_url)
+                for v in all_commits_pages.values():
+                    all_commits.extend(v)
                 if not all_commits:
                     return NoCommitDisplayObject()
                 return MultipleCommitDisplayObject(all_commits)

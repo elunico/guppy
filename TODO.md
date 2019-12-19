@@ -12,11 +12,14 @@
   - [x]  user info
   - [x]  repo info
   - [x]  repo language info
-  - [ ]  issues,
-  - [ ]  commits,
+  - [ ]  repo issues list,
+  - [ ]  repo commits list,
   - [ ]  user repo list,
   - [ ]  user gists list,
-  - [ ]  user following,
-  - [ ]  user followers
+  - [ ]  full issues
+  - [ ]  full commits
+  - [ ]  user following list ,
+  - [ ]  user followers list
+  - *list items should be cached by page for easy retrieval*
 - [ ]  Invalidate caches after a certain (configurable?) amount of time
 - [ ]  Fix `-g all` for the user option. See #2

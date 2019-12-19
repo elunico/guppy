@@ -86,16 +86,16 @@ def get_max_pages(url):
 
 
 def get_all_data_pages(pages_list, base_url):
-    all_issues = []
+    all_issues = {}
     for page in pages_list:
         issue_req = requests.get(
             base_url + "?page={}".format(page))
         if not response_check(issue_req):
-            return []
+            return {}
         issue_info = issue_req.json()
         if not issue_info:
-            return []
-        all_issues.extend(issue_info)
+            return {}
+        all_issues[page] = issue_info
     return all_issues
 
 
