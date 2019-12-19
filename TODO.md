@@ -18,3 +18,5 @@
   - [ ]  user gists list,
   - [ ]  user following,
   - [ ]  user followers
+- [ ]  Invalidate caches after a certain (configurable?) amount of time
+- [ ]  Fix `-g all` for the user option. See #2
