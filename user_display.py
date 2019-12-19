@@ -5,6 +5,7 @@ from colors import *
 from display import *
 from gists_display import *
 from repo_display import RepoInfoDisplayObject
+from caching import *
 
 
 def parse_repo_args(args):
@@ -22,15 +23,34 @@ def parse_repo_args(args):
     return parser.parse_args(args)
 
 
+def fetch_user_info(username, url, caching=True):
+    if not caching:
+        req = requests.get(url.format(user=username))
+        user_info = req.json()
+        rate_limit_check(req)
+        return user_info
+    else:
+        cached = get_cached_user(username)
+        if not cached:
+            putln(yellow, 'cache miss')
+            clear()
+            req = requests.get(url.format(user=username))
+            user_info = req.json()
+            rate_limit_check(req)
+            cache_user(username, user_info)
+            return user_info
+        else:
+            putln(green, 'cache hit')
+            clear()
+            return cached
+
+
 def info_user(*clas):
     options = parse_repo_args(clas)
     user = options.user
-    req = requests.get(user_url.format(user=user))
-    user_info = req.json()
+    user_info = fetch_user_info(user, user_url)
     if not response_check(user_info, user):
         return
-
-    rate_limit_check(req)
 
     if options.repos is False and options.gists is False and options.followers is False and options.following is False:
         program_name()
