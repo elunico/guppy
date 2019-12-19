@@ -6,9 +6,14 @@ from typing import Union
 from typing import Optional
 from typing import Dict
 
+############
+# Qualified repo names (user/repo) are stored in files as `user$repo`
+# due to limitations of filesystems around files containing `/`
+############
+
 user_home = os.path.expanduser('~')
 cache_path = os.path.join(user_home, '.guppy', 'caches')
-state_path = os.path.join(user_home, '.guppy', 'state')
+state_path = os.path.join(user_home, '.guppy', 'CACHING_ACTIVE')
 size_path = os.path.join(user_home, '.guppy', 'size')
 index_path = os.path.join(user_home, '.guppy', 'cache_index')
 
@@ -23,28 +28,13 @@ def get_cache_size():
 
 
 def serialize(data):
-    return msgpack.packb(data)
+    # use_bin_type tells msgpack to distinguish str and bytes
+    return msgpack.packb(data, use_bin_type=True)
 
 
 def unserialize(data):
-    b = msgpack.unpackb(data)
-    if isinstance(b, dict):
-        ret = {}
-        for (k, v) in b.items():
-            if isinstance(k, bytes):
-                k = str(k, encoding='utf-8')
-            if isinstance(v, bytes):
-                v = str(v, encoding='utf-8')
-            ret[k] = v
-        return ret
-    else:
-        assert isinstance(b, list)
-        ret = []
-        for item in b:
-            if isinstance(item, bytes):
-                item = str(item, encoding='utf-8')
-            ret.append(item)
-        return ret
+    # raw=False tells msgpack to convert str back into str not keep as bytes
+    return msgpack.unpackb(data, raw=False)
 
 
 def cacheTo(*args):
@@ -91,15 +81,15 @@ def size_for(s):
 
 
 with open(state_path) as f:
-    state = f.read()
+    CACHING_ACTIVE = f.read() == 'start'
 with open(size_path) as f:
-    size = size_for(f.read())
+    MAX_CACHE_SIZE = size_for(f.read())
 
 
 def prune_max_size():
     global index
     entries = sorted(list(index.items()), key=lambda x: x[1])
-    while get_cache_size() > size and len(entries) > 0:
+    while get_cache_size() > MAX_CACHE_SIZE and len(entries) > 0:
         path = str(entries.pop(0)[0], encoding='utf-8')
         path = cacheTo(path)
         assert '.guppy' in path
@@ -110,6 +100,8 @@ def prune_max_size():
 
 def cache_language(qrepo: str, data: dict) -> int:
     prune_max_size()
+    if '/' in qrepo:
+        qrepo = qrepo.replace('/', '$')
     path = 'repo:{}.lang'.format(qrepo)
     index[path] = time.time()
     with open(cacheTo(path), 'wb') as f:
@@ -126,13 +118,17 @@ def cache_user(username: str, data: dict) -> int:
 
 def cache_repo(qrepo: str, data: dict) -> int:
     prune_max_size()
+    if '/' in qrepo:
+        qrepo = qrepo.replace('/', '$')
     path = 'repo:{}'.format(qrepo)
     index[path] = time.time()
     with open(cacheTo(path), 'wb') as f:
         return f.write(serialize(data))
 
 
-def get_cached_language(qrepo: str, data: dict) -> int:
+def get_cached_language(qrepo: str) -> int:
+    if '/' in qrepo:
+        qrepo = qrepo.replace('/', '$')
     path = 'repo:{}.lang'.format(qrepo)
     if os.path.exists(cacheTo(path)):
         with open(cacheTo(path), 'rb') as f:
@@ -149,6 +145,8 @@ def get_cached_user(username: str) -> Optional[dict]:
 
 
 def get_cached_repo(qrepo: str) -> Optional[dict]:
+    if '/' in qrepo:
+        qrepo = qrepo.replace('/', '$')
     path = 'repo:{}'.format(qrepo)
     if os.path.exists(cacheTo(path)):
         with open(cacheTo(path), 'rb') as f:
@@ -156,13 +154,21 @@ def get_cached_repo(qrepo: str) -> Optional[dict]:
     return None
 
 
+def clear_cache():
+    c = 0
+    for file in os.listdir(cache_path):
+        os.remove(file)
+        c += 1
+
+
 def cache_action(action: str):
     action = action.lower()
     if action == 'clear':
-        pass
+        count = clear_cache()
+        print("Deleted {} cached records.".format(count))
     elif action == 'check':
-        print("Cache state: {}".format(state))
-        print("Cache max size: {:,} bytes".format(size))
+        print("Cache CACHING_ACTIVE: {}".format(CACHING_ACTIVE))
+        print("Cache max size: {:,} bytes".format(MAX_CACHE_SIZE))
         csize = get_cache_size()
         print("Cache current size: {:,} bytes".format(csize))
     elif action == 'start':

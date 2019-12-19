@@ -23,7 +23,7 @@ def parse_repo_args(args):
     return parser.parse_args(args)
 
 
-def fetch_user_info(username, url, caching=True):
+def fetch_user_info(username, url, caching=CACHING_ACTIVE):
     if not caching:
         req = requests.get(url.format(user=username))
         user_info = req.json()
@@ -32,7 +32,7 @@ def fetch_user_info(username, url, caching=True):
     else:
         cached = get_cached_user(username)
         if not cached:
-            putln(yellow, 'cache miss')
+            debug('cache miss', yellow)
             clear()
             req = requests.get(url.format(user=username))
             user_info = req.json()
@@ -40,7 +40,7 @@ def fetch_user_info(username, url, caching=True):
             cache_user(username, user_info)
             return user_info
         else:
-            putln(green, 'cache hit')
+            debug('cache hit', green)
             clear()
             return cached
 
