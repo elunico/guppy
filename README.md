@@ -12,6 +12,8 @@ It is named guppy for two reasons. 1) guppy ends in py and guppy is written in P
 
 - Guppy also requires the `dateutil.parser` module. This might already be installed, but if it is not you can use `pip install python-dateutil` or `pip3 install python-dateutil` if you run python 3 with the `python3` command.
 
+- Guppy also requires `msgpack` for caching. You can install this by doing `pip install msgpack` or `pip3` if you use the `python3` command.
+
 ## Usage
 
 Once cloned or downloaded, simply `cd` into the folder and use
@@ -58,4 +60,4 @@ and the language information
 
 ## Disclaimer
 
-This program is being actively developed and it is likely many things will change. Nothing about the command line options, access, input, or output should be expected to stay the same until development ends 
+This program is being actively developed and it is likely many things will change. Nothing about the command line options, access, input, or output should be expected to stay the same until development ends
