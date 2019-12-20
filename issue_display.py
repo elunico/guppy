@@ -7,10 +7,10 @@ from display import *
 
 class IssueDisplayObjectFactory:
     @staticmethod
-    def forIssue(issues, issue_url):
+    def forIssue(repo, issues, issue_url):
         if issues == 'all':
             all_issues = []
-            all_issues_pages = get_all_pages_warned(issue_url)
+            all_issues_pages = get_all_pages_warned(repo, issue_url, 'issues')
             for v in all_issues_pages.values():
                 all_issues.extend(v)
             if not all_issues:
@@ -20,7 +20,8 @@ class IssueDisplayObjectFactory:
             if 'p' in issues:
                 pages = parse_pages(issues)
                 all_issues = []
-                all_issues_pages = get_all_data_pages(pages, issue_url)
+                all_issues_pages = get_all_data_pages(
+                    repo, pages, issue_url, 'issues')
                 for v in all_issues_pages.values():
                     all_issues.extend(v)
                 if not all_issues:

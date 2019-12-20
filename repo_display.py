@@ -90,13 +90,13 @@ def info_repo(*clas):
         RepoInfoDisplayObject(repo_info).display()
         nl()
         o = IssueDisplayObjectFactory.forIssue(
-            options.issues, repo_info['issues_url'][:-9]).display()
+            '{}/{}'.format(user, repo), options.issues, repo_info['issues_url'][:-9]).display()
     elif options.commits:
         program_name()
         RepoInfoDisplayObject(repo_info).display()
         nl()
-        o = CommitDisplayFactory.forCommit(
-            options.commits, repo_info['commits_url'][:-6]).display()
+        o = CommitDisplayFactory.forCommit('{}/{}'.format(user, repo),
+                                           options.commits, repo_info['commits_url'][:-6]).display()
 
 
 class RepoInfoDisplayObject(DisplayObject):

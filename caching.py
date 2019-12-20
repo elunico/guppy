@@ -9,7 +9,7 @@ from typing import Optional
 from typing import Dict
 
 ############
-# Qualified repo names (user/repo) are stored in files as `user$repo`
+# Qualified repo names (user/repo) are stored in files as `user-repo`
 # due to limitations of filesystems around files containing `/`
 ############
 
@@ -105,7 +105,7 @@ def prune_max_size():
 def cache_language(qrepo: str, data: dict) -> int:
     prune_max_size()
     if '/' in qrepo:
-        qrepo = qrepo.replace('/', '$')
+        qrepo = qrepo.replace('/', '-')
     path = 'repo.{}.lang'.format(qrepo)
     index[path] = time.time()
     with open(cacheTo(path), 'wb') as f:
@@ -123,7 +123,7 @@ def cache_user(username: str, data: dict) -> int:
 def cache_repo(qrepo: str, data: dict) -> int:
     prune_max_size()
     if '/' in qrepo:
-        qrepo = qrepo.replace('/', '$')
+        qrepo = qrepo.replace('/', '-')
     path = 'repo.{}'.format(qrepo)
     index[path] = time.time()
     with open(cacheTo(path), 'wb') as f:
@@ -142,9 +142,9 @@ def cache_repo_list(qrepo: str, list: str, page: str, data: list) -> int:
     '''
     `list` param should be issues or commits
     '''
-    qrepo = qrepo.replace('/', '$')
+    qrepo = qrepo.replace('/', '-')
     prune_max_size()
-    path = 'repo.{}.{}.{}'.format(user, list, page)
+    path = 'repo.{}.{}.{}'.format(qrepo, list, page)
     index[path] = time.time()
     with open(cacheTo(path), 'wb') as f:
         return f.write(serialize(data))
@@ -159,6 +159,18 @@ def cache_user_list(user: str, list: str, page: str, data: list) -> int:
     index[path] = time.time()
     with open(cacheTo(path), 'wb') as f:
         return f.write(serialize(data))
+
+
+def get_cached_repo_list(qrepo: str, list: str, page: str) -> int:
+    '''
+    `list` param should be issues or commits
+    '''
+    qrepo = qrepo.replace('/', '-')
+    path = 'repo.{}.{}.{}'.format(qrepo, list, page)
+    if os.path.exists(cacheTo(path)):
+        with open(cacheTo(path), 'rb') as f:
+            return unserialize(f.read())
+    return None
 
 
 def get_cached_user_list(user: str, list: str, page: str) -> Optional[list]:
@@ -182,7 +194,7 @@ def get_cached_commit(qrepo: str, id: str) -> int:
 
 def get_cached_language(qrepo: str) -> Optional[dict]:
     if '/' in qrepo:
-        qrepo = qrepo.replace('/', '$')
+        qrepo = qrepo.replace('/', '-')
     path = 'repo.{}.lang'.format(qrepo)
     if os.path.exists(cacheTo(path)):
         with open(cacheTo(path), 'rb') as f:
@@ -200,7 +212,7 @@ def get_cached_user(username: str) -> Optional[dict]:
 
 def get_cached_repo(qrepo: str) -> Optional[dict]:
     if '/' in qrepo:
-        qrepo = qrepo.replace('/', '$')
+        qrepo = qrepo.replace('/', '-')
     path = 'repo.{}'.format(qrepo)
     if os.path.exists(cacheTo(path)):
         with open(cacheTo(path), 'rb') as f:

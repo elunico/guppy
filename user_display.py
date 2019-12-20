@@ -61,12 +61,12 @@ def info_user(*clas):
         program_name()
         UserInfoDisplayObject(user_info).display()
         nl()
-        UserReposDisplayObjectFactory.forRepos(
-            options.repos, user_info['repos_url']).display()
+        UserReposDisplayObjectFactory.forRepos(user,
+                                               options.repos, user_info['repos_url']).display()
     elif options.gists:
         program_name()
-        UserGistsDisplayObjectFactory.forGists(
-            options.gists, user_info['gists_url'][:-10]).display()
+        UserGistsDisplayObjectFactory.forGists(user,
+                                               options.gists, user_info['gists_url'][:-10]).display()
     elif options.following:
         pass
     elif options.followers:
@@ -83,10 +83,10 @@ class NoReposDisplayObject(DisplayObject):
 
 class UserReposDisplayObjectFactory:
     @staticmethod
-    def forRepos(repos, repos_url):
+    def forRepos(user, repos, repos_url):
         if repos == 'all':
             all_repos = []
-            all_repos_pages = get_all_pages_warned(repos_url)
+            all_repos_pages = get_all_pages_warned(user, repos_url, 'repos')
             for v in all_repos_pages.values():
                 all_repos.extend(v)
             if not all_repos:
@@ -96,7 +96,8 @@ class UserReposDisplayObjectFactory:
             if 'p' in repos:
                 pages = parse_pages(repos)
                 all_repos = []
-                all_repos_pages = get_all_data_pages(pages, repos_url)
+                all_repos_pages = get_all_data_pages(
+                    user, pages, repos_url, 'repos')
                 for v in all_repos_pages.values():
                     all_repos.extend(v)
                 if not all_repos:
