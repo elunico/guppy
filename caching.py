@@ -4,6 +4,7 @@ import msgpack
 import time
 from colors import *
 from utils import *
+from display import commify, fmt_bytes
 from typing import Union
 from typing import Optional
 from typing import Dict
@@ -237,16 +238,29 @@ def cache_action(action: str):
         count = clear_cache()
         print("Deleted {} cached records.".format(count))
     elif action == 'check':
-        print("Cache CACHING_ACTIVE: {}".format(CACHING_ACTIVE))
-        print("Cache max size: {:,} bytes".format(MAX_CACHE_SIZE))
+        print("Using cache?: {}".format(CACHING_ACTIVE))
+        print("Cache max size: {}".format(fmt_bytes(MAX_CACHE_SIZE)))
         csize = get_cache_size()
-        print("Cache current size: {:,} bytes".format(csize))
+        print("Cache current size: {} bytes".format(fmt_bytes(csize)))
     elif action == 'start':
-        with open(state_path, 'w') as f:
-            f.write('start')
+        try:
+            with open(state_path, 'w') as f:
+                f.write('start')
+        except Exception as e:
+            print(red, 'Could not start caching: ' + str(e))
+        else:
+            print(
+                green, 'Caching active! Previous, if any, and future cache data will be available starting now')
+        clear()
     elif action == 'stop':
-        with open(state_path, 'w') as f:
-            f.write('stop')
+        try:
+            with open(state_path, 'w') as f:
+                f.write('stop')
+        except Exception as e:
+            print(red, 'Could not disable caching: ' + str(e))
+        else:
+            print(green, 'Caching stopped! Future invocations will always result in requests to Github. Use CLEAR option to clear existing caches.')
+        clear()
     elif action.startswith('size:'):
         value = size_for(action[5:])
         with open(size_path, 'w') as f:
