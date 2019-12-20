@@ -1,5 +1,3 @@
-import os
-import subprocess
 import sys
 import re
 import requests
@@ -16,26 +14,6 @@ repo_url = 'https://api.github.com/repos/{user}/{repo}'
 languages_url = 'https://api.github.com/repos/{user}/{repo}/languages'
 
 usage = "Usage: {0} mode. Try '{0} help' for help".format(sys.argv[0])
-
-try:
-    if 'COLUMNS' in os.environ:
-        CONSOLE_WIDTH = int(os.environ['COLUMNS'])
-    elif os.system('stty size > /dev/null 2>&1') == 0:
-        CONSOLE_WIDTH = int(subprocess.getstatusoutput(
-            'stty size')[1].split()[1])
-    else:
-        CONSOLE_WIDTH = 80
-except (IndexError, ValueError, AttributeError):
-    CONSOLE_WIDTH = 80
-
-
-def boxed(msg, center=CONSOLE_WIDTH - 4):
-    items = msg.splitlines()
-    print('-' * CONSOLE_WIDTH)
-    for line in items:
-        line = line.center(center)
-        print("| {} |".format(line))
-    print('-' * CONSOLE_WIDTH)
 
 
 def formatted_time(isotime, localeString="%A, %B %d, %Y at %I:%M%P %Z"):

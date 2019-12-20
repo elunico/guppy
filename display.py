@@ -1,6 +1,29 @@
 import textwrap
+import os
+import subprocess
 from colors import *
-from utils import *
+# from utils import
+
+
+try:
+    if 'COLUMNS' in os.environ:
+        CONSOLE_WIDTH = int(os.environ['COLUMNS'])
+    elif os.system('stty size > /dev/null 2>&1') == 0:
+        CONSOLE_WIDTH = int(subprocess.getstatusoutput(
+            'stty size')[1].split()[1])
+    else:
+        CONSOLE_WIDTH = 80
+except (IndexError, ValueError, AttributeError):
+    CONSOLE_WIDTH = 80
+
+
+def boxed(msg, center=CONSOLE_WIDTH - 4):
+    items = msg.splitlines()
+    print('-' * CONSOLE_WIDTH)
+    for line in items:
+        line = line.center(center)
+        print("| {} |".format(line))
+    print('-' * CONSOLE_WIDTH)
 
 
 class DisplayObject:
