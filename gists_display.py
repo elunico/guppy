@@ -5,10 +5,10 @@ from user_display import *
 
 class UserGistsDisplayObjectFactory:
     @staticmethod
-    def forGists(gists, gists_url):
+    def forGists(user, gists, gists_url):
         if gists == 'all':
             all_gists = []
-            all_gists_pages = get_all_pages_warned(gists_url)
+            all_gists_pages = get_all_pages_warned(user, gists_url, 'gists')
             for v in all_gists_pages.values():
                 all_gists.extend(v)
             if not all_gists:
@@ -18,7 +18,7 @@ class UserGistsDisplayObjectFactory:
             if 'p' in gists:
                 pages = parse_pages(gists)
                 all_gists = []
-                all_gists_pages = get_all_data_pages(gists, gists_url)
+                all_gists_pages = get_all_data_pages(user, gists, gists_url, 'gists')
                 for v in all_gists_pages.values():
                     all_gists.extend(v)
                 if not all_gists:
