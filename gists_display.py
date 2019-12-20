@@ -1,14 +1,19 @@
 from utils import *
 from display import *
 from user_display import *
+from colors import *
 
 
 class UserGistsDisplayObjectFactory:
     @staticmethod
     def forGists(user, gists, gists_url):
+        print(gists_url)
         if gists == 'all':
+            putln(yellow, 'Warning: Gists do not support automatic pagination. Only the first page of gists will be returned. Specify pages to see others.')
+            nl()
             all_gists = []
-            all_gists_pages = get_all_pages_warned(user, gists_url, 'gists')
+            # all_gists_pages = get_all_pages_warned(user, gists_url, 'gists')
+            all_gists_pages = get_all_data_pages(user, [1], gists_url, 'gists')
             for v in all_gists_pages.values():
                 all_gists.extend(v)
             if not all_gists:
@@ -18,7 +23,8 @@ class UserGistsDisplayObjectFactory:
             if 'p' in gists:
                 pages = parse_pages(gists)
                 all_gists = []
-                all_gists_pages = get_all_data_pages(user, gists, gists_url, 'gists')
+                all_gists_pages = get_all_data_pages(
+                    user, gists, gists_url, 'gists')
                 for v in all_gists_pages.values():
                     all_gists.extend(v)
                 if not all_gists:
