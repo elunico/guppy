@@ -3,6 +3,7 @@ import requests
 from utils import *
 from repo_display import *
 from display import *
+from caching import *
 
 
 def fetch_issue(repo, issue, issues_url, caching=CACHING_ACTIVE):

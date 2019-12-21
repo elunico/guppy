@@ -54,7 +54,7 @@ if os.environ.get('DEBUG', False):
         return "{}:{}:{}".format(os.path.split(inspect.stack()[2][1])[-1], inspect.stack()[2][2],
                                  inspect.stack()[2][3])
 
-    def debug(msg, color=black):
+    def debug(msg, color=yellow):
         print("{2}DEBUG: {0} {1}{3}".format(line(), msg, color, black))
 else:
     def line(): return ''
