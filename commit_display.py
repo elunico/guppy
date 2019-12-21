@@ -5,6 +5,26 @@ from repo_display import *
 from display import *
 
 
+def fetch_commit(repo, commit, commits_url, caching=CACHING_ACTIVE):
+    if not caching:
+        data = requests.get("{}/{}".format(commits_url, commit)).json()
+        if not response_check(data):
+            return {}
+        return data
+    else:
+        cached = get_cached_commit(repo, commit)
+        if not cached:
+            debug('cache miss commit', yellow)
+            data = requests.get("{}/{}".format(commits_url, commit)).json()
+            if not response_check(data):
+                return {}
+            cache_commit(repo, commit, data)
+            return data
+        else:
+            debug('Cache hit commit', green)
+            return cached
+
+
 class CommitDisplayFactory:
 
     @staticmethod
@@ -30,8 +50,7 @@ class CommitDisplayFactory:
                     return NoCommitDisplayObject()
                 return MultipleCommitDisplayObject(all_commits)
             else:
-                commit_info = requests.get(
-                    "{}/{}".format(commits_url, commit)).json()
+                commit_info = fetch_commit(repo, commit, commits_url)
                 if not commit_info:
                     return NoCommitDisplayObject()
                 return SingleLongCommitDisplayObject(commit_info)

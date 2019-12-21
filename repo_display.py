@@ -27,14 +27,14 @@ def fetch_repo_info(user, repo, url, caching=CACHING_ACTIVE):
         rate_limit_check(req)
         return repo_info
     else:
-        cached = get_cached_repo("{};{}".format(user, repo))
+        cached = get_cached_repo("{}/{}".format(user, repo))
         if not cached:
             debug('repo cache miss', yellow)
             clear()
             req = requests.get(url.format(user=user, repo=repo))
             repo_info = req.json()
             rate_limit_check(req)
-            cache_repo("{};{}".format(user, repo), repo_info)
+            cache_repo("{}/{}".format(user, repo), repo_info)
             return repo_info
         else:
             debug('repo cache hit', green)
@@ -49,14 +49,14 @@ def fetch_repo_language(user, repo, url, caching=CACHING_ACTIVE):
         rate_limit_check(req)
         return lang_info
     else:
-        cached = get_cached_language("{};{}".format(user, repo))
+        cached = get_cached_language("{}/{}".format(user, repo))
         if not cached:
             debug('repo language cache miss', yellow)
             clear()
             req = requests.get(url.format(user=user, repo=repo))
             lang_info = req.json()
             rate_limit_check(req)
-            cache_language("{};{}".format(user, repo), lang_info)
+            cache_language("{}/{}".format(user, repo), lang_info)
             return lang_info
         else:
             debug('repo language cache hit', green)

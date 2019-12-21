@@ -132,11 +132,19 @@ def cache_repo(qrepo: str, data: dict) -> int:
 
 
 def cache_issue(qrepo: str, id: str, data: dict) -> int:
-    raise NotImplementedError()
+    qrepo = qrepo.replace('/', '-')
+    path = 'repo.{}.issue.{}'.format(qrepo, id)
+    index[path] = time.time()
+    with open(cacheTo(path), 'wb') as f:
+        return f.write(serialize(data))
 
 
 def cache_commit(qrepo: str, sha: str, data: dict) -> int:
-    raise NotImplementedError()
+    qrepo = qrepo.replace('/', '-')
+    path = 'repo.{}.commit.{}'.format(qrepo, sha)
+    index[path] = time.time()
+    with open(cacheTo(path), 'wb') as f:
+        return f.write(serialize(data))
 
 
 def cache_repo_list(qrepo: str, list: str, page: str, data: list) -> int:
@@ -145,7 +153,7 @@ def cache_repo_list(qrepo: str, list: str, page: str, data: list) -> int:
     '''
     qrepo = qrepo.replace('/', '-')
     prune_max_size()
-    path = 'repo.{}.{}.{}'.format(qrepo, list, page)
+    path = 'repo.{}.{}.p{}'.format(qrepo, list, page)
     index[path] = time.time()
     with open(cacheTo(path), 'wb') as f:
         return f.write(serialize(data))
@@ -156,7 +164,7 @@ def cache_user_list(user: str, list: str, page: str, data: list) -> int:
     `list` param should be repos or gists
     '''
     prune_max_size()
-    path = 'user.{}.{}.{}'.format(user, list, page)
+    path = 'user.{}.{}.p{}'.format(user, list, page)
     index[path] = time.time()
     with open(cacheTo(path), 'wb') as f:
         return f.write(serialize(data))
@@ -167,7 +175,7 @@ def get_cached_repo_list(qrepo: str, list: str, page: str) -> int:
     `list` param should be issues or commits
     '''
     qrepo = qrepo.replace('/', '-')
-    path = 'repo.{}.{}.{}'.format(qrepo, list, page)
+    path = 'repo.{}.{}.p{}'.format(qrepo, list, page)
     if os.path.exists(cacheTo(path)):
         with open(cacheTo(path), 'rb') as f:
             return unserialize(f.read())
@@ -178,7 +186,7 @@ def get_cached_user_list(user: str, list: str, page: str) -> Optional[list]:
     '''
     `list` param should be repos or gists
     '''
-    path = 'user.{}.{}.{}'.format(user, list, page)
+    path = 'user.{}.{}.p{}'.format(user, list, page)
     if os.path.exists(cacheTo(path)):
         with open(cacheTo(path), 'rb') as f:
             return unserialize(f.read())
@@ -186,11 +194,21 @@ def get_cached_user_list(user: str, list: str, page: str) -> Optional[list]:
 
 
 def get_cached_issue(qrepo: str, id: str) -> int:
-    raise NotImplementedError()
+    qrepo = qrepo.replace('/', '-')
+    path = 'repo.{}.issue.{}'.format(qrepo, id)
+    if os.path.exists(cacheTo(path)):
+        with open(cacheTo(path), 'rb') as f:
+            return unserialize(f.read())
+    return None
 
 
-def get_cached_commit(qrepo: str, id: str) -> int:
-    raise NotImplementedError()
+def get_cached_commit(qrepo: str, sha: str) -> int:
+    qrepo = qrepo.replace('/', '-')
+    path = 'repo.{}.commit.{}'.format(qrepo, sha)
+    if os.path.exists(cacheTo(path)):
+        with open(cacheTo(path), 'rb') as f:
+            return unserialize(f.read())
+    return None
 
 
 def get_cached_language(qrepo: str) -> Optional[dict]:
