@@ -16,11 +16,11 @@
   - [x]  repo commits list,
   - [x]  user repo list,
   - [x]  user gists list,
-  - [ ]  full issues
-  - [ ]  full commits
+  - [x]  full issues
+  - [x]  full commits
   - [ ]  user following list ,
   - [ ]  user followers list
   - [x] *list items should be cached by page for easy retrieval*
     - **They are!**
 - [ ]  Invalidate caches after a certain (configurable?) amount of time
-- [ ]  Fix `-g all` for the user option. See #2
+- [x]  Fix `-g all` for the user option. See #2

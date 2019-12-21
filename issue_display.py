@@ -5,6 +5,26 @@ from repo_display import *
 from display import *
 
 
+def fetch_issue(repo, issue, issues_url, caching=CACHING_ACTIVE):
+    if not caching:
+        data = requests.get(issues_url + "/{}".format(issue)).json()
+        if not response_check(data):
+            return {}
+        return data
+    else:
+        cached = get_cached_issue(repo, issue)
+        if not cached:
+            debug('cache miss issue', yellow)
+            data = requests.get(issues_url + "/{}".format(issue)).json()
+            if not response_check(data):
+                return {}
+            cache_issue(repo, issue, data)
+            return data
+        else:
+            debug('Cache hit issue', green)
+            return cached
+
+
 class IssueDisplayObjectFactory:
     @staticmethod
     def forIssue(repo, issues, issue_url):
@@ -28,8 +48,7 @@ class IssueDisplayObjectFactory:
                     return NoIssueDisplayObject()
                 return MultipleIssueDisplayObject(all_issues)
             else:
-                issue_info = requests.get(
-                    issue_url + "/{}".format(issues)).json()
+                issue_info = fetch_issue(repo, issues, issue_url)
                 if not issue_info:
                     return NoIssueDisplayObject()
                 return SingleLongIssueDisplayObject(issue_info)

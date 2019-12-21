@@ -53,7 +53,9 @@ def parse_pages(pagesString):
 
 def get_max_pages(url):
     issue_req = requests.get(url)
-    assert('Link' in issue_req.headers)
+    if 'Link' not in issue_req.headers:
+        debug('Link header not found', yellow)
+        return False, [1]
     if not response_check(issue_req):
         return False, []
     last_page = max((int(i) for i in re.findall(
