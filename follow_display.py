@@ -8,6 +8,8 @@ class UserFollowDisplayObjectFactory:
     def forFollow(user, kind, following, url):
         if following == 'all':
             all_following = []
+            # get_all_data_pages and get_all_pages_warned are
+            # cache aware functions that work similarly to fetch_commit
             all_following_pages = get_all_pages_warned(
                 user, url, kind)
             for v in all_following_pages.values():
@@ -18,6 +20,8 @@ class UserFollowDisplayObjectFactory:
         elif following[0] == 'p':
             pages = parse_pages(following)
             all_following = []
+            # get_all_data_pages and get_all_pages_warned are
+            # cache aware functions that work similarly to fetch_commit
             all_following_pages = get_all_data_pages(user, pages, url, kind)
             for v in all_following_pages.values():
                 all_following.extend(v)

@@ -6,6 +6,10 @@ from display import *
 
 
 def fetch_issue(repo, issue, issues_url, caching=CACHING_ACTIVE):
+    """
+    Retrieves an issue for a partiular repo either from the cache if it
+    exists there for by making a request to GitHub if it does not
+    """
     if not caching:
         data = requests.get(issues_url + "/{}".format(issue)).json()
         if not response_check(data):

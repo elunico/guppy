@@ -12,7 +12,8 @@ class UserGistsDisplayObjectFactory:
             putln(yellow, 'Warning: Gists do not support automatic pagination. Only the first page of gists will be returned. Specify pages to see others.')
             nl()
             all_gists = []
-            # all_gists_pages = get_all_pages_warned(user, gists_url, 'gists')
+            # get_all_data_pages and get_all_pages_warned are
+            # cache aware functions
             all_gists_pages = get_all_data_pages(user, [1], gists_url, 'gists')
             for v in all_gists_pages.values():
                 all_gists.extend(v)

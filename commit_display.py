@@ -6,6 +6,10 @@ from display import *
 
 
 def fetch_commit(repo, commit, commits_url, caching=CACHING_ACTIVE):
+    """
+    Retrieves a commit for a partiular repo either from the cache if it
+    exists there for by making a request to GitHub if it does not
+    """
     if not caching:
         data = requests.get("{}/{}".format(commits_url, commit)).json()
         if not response_check(data):
@@ -29,8 +33,14 @@ class CommitDisplayFactory:
 
     @staticmethod
     def forCommit(repo, commit, commits_url):
+        """
+        `commit` is the string passed on the command line specifying
+        which commits want to be seen. It is either all, pPAGES, or a commit SHA
+        """
         if commit == 'all':
             all_commits = []
+            # get_all_data_pages and get_all_pages_warned are
+            # cache aware functions that work similarly to fetch_commit
             all_commits_pages = get_all_pages_warned(
                 repo, commits_url, 'commits')
             for v in all_commits_pages.values():

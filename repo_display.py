@@ -21,6 +21,11 @@ def parse_repo_args(args):
 
 
 def fetch_repo_info(user, repo, url, caching=CACHING_ACTIVE):
+    """
+    Retrieves the general information for a partiular repo either
+    from the cache if it exists there for by making a request to
+    GitHub if it does not
+    """
     if not caching:
         req = requests.get(url.format(user=user, repo=repo))
         repo_info = req.json()
@@ -43,6 +48,10 @@ def fetch_repo_info(user, repo, url, caching=CACHING_ACTIVE):
 
 
 def fetch_repo_language(user, repo, url, caching=CACHING_ACTIVE):
+    """
+    Retrieves the language data for a partiular repo either from the cache if it
+    exists there for by making a request to GitHub if it does not
+    """
     if not caching:
         req = requests.get(url.format(user=user, repo=repo))
         lang_info = req.json()
@@ -69,7 +78,6 @@ def info_repo(*clas):
     user, repo = options.repo.split('/')
     repo_info = fetch_repo_info(user, repo, repo_url)
 
-    # TODO: replace with response_check
     if 'message' in repo_info:
         if repo_info['message'] == 'Not Found':
             putln(red, 'Repo `{}` for user `{}` not found!'.format(repo, user))
@@ -80,6 +88,7 @@ def info_repo(*clas):
             clear()
             return
 
+    # creates the correct DisplayObjects based on the options passed in by the user
     if options.issues is False and options.commits is False:
         program_name()
         RepoInfoDisplayObject(repo_info).display()
@@ -120,6 +129,9 @@ class RepoInfoDisplayObject(DisplayObject):
         find_at = self.repo_info['html_url']
         desc = self.repo_info['description']
 
+        # displaying title is delegated to injected class
+        # to allow for the reuse of this object in multiple
+        # contexts. See display.py for more
         self.titler.show_title(self.get_title())
 
         puts(bold, "Name: ")
@@ -148,6 +160,7 @@ class RepoLanguageInfoDisplayObject(DisplayObject):
             user, repo, self.repo_info['languages_url'])
         if not response_check(langs, 'languages'):
             return
+        # calculating totals so a percentage can be found
         total = sum([lines for (lang, lines) in langs.items()])
         try:
             longest_lang = max([len(lang) for (lang, lines) in langs.items()])
