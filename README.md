@@ -71,9 +71,13 @@ It is a string of comma or hypen separated numbers that indicate a group of page
 For example,
 
 `1` indicates page 1.
+
 `1,2,3,4` indicates pages 1, 2, 3, and 4
+
 `1-4` also indicates pages 1, 2, 3, and 4
+
 `1,2,3,5-9` indicates pages 1, 2, 3, 5, 6, 7, 8, and 9.
+
 `1,3-8,14` indicates pages 1, 3, 4, 5, 6, 7, 8, and 14.
 
 and so on.
