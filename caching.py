@@ -3,7 +3,6 @@ import os
 import msgpack
 import time
 from colors import *
-from utils import *
 from display import commify, fmt_bytes
 from typing import Union
 from typing import Optional
@@ -130,7 +129,7 @@ def prune_expired_caches():
     # index is sorted by time, oldest times towards 0
     # while the oldest items are older than the MAX
     # remove those items
-    while now - entries[0][1] > MAX_CACHE_SECONDS:
+    while len(entries) > 0 and now - entries[0][1] > MAX_CACHE_SECONDS:
         path = cacheTo(entries.pop(0)[0])
         assert '.guppy' in path
         try:

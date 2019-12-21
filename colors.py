@@ -8,6 +8,7 @@ bold = '\033[1m'
 uline = '\033[4m'
 
 from typing import List
+import os
 
 
 def puts(color: str, *msgs: str, sep=' '):
@@ -42,3 +43,19 @@ def putEntry(key, value, keyColor=bold, valueColor=black):
     """
     putln("{}{}: {}{}".format(keyColor, key, valueColor, value))
     clear()
+
+
+if os.environ.get('DEBUG', False):
+
+    import inspect
+
+    def line():
+        return inspect.getframeinfo(inspect.currentframe()).lineno
+
+    def debug(msg, color=black):
+        print("{3}DEBUG: [{0}:{1}] {2}{4}".format(
+            __name__, line(), msg, color, black))
+else:
+    def line(): return ''
+
+    def debug(*args, **kwargs): pass
