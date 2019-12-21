@@ -65,6 +65,9 @@ def info_user(*clas):
         program_name()
         UserInfoDisplayObject(user_info).display()
         nl()
+        print(user)
+        print(options.repos)
+        print(user_info['repos_url'])
         UserReposDisplayObjectFactory.forRepos(user,
                                                options.repos, user_info['repos_url']).display()
     elif options.gists:
@@ -99,6 +102,7 @@ class UserReposDisplayObjectFactory:
     @staticmethod
     def forRepos(user, repos, repos_url):
         if repos == 'all':
+            debug('all')
             all_repos = []
             all_repos_pages = get_all_pages_warned(user, repos_url, 'repos')
             for v in all_repos_pages.values():
