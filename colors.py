@@ -48,13 +48,14 @@ def putEntry(key, value, keyColor=bold, valueColor=black):
 if os.environ.get('DEBUG', False):
 
     import inspect
+    import os.path
 
     def line():
-        return inspect.getframeinfo(inspect.currentframe()).lineno
+        return "{}:{}:{}".format(os.path.split(inspect.stack()[2][1])[-1], inspect.stack()[2][2],
+                                 inspect.stack()[2][3])
 
     def debug(msg, color=black):
-        print("{3}DEBUG: [{0}:{1}] {2}{4}".format(
-            __name__, line(), msg, color, black))
+        print("{2}DEBUG: {0} {1}{3}".format(line(), msg, color, black))
 else:
     def line(): return ''
 
