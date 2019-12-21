@@ -5,6 +5,7 @@ from colors import *
 from display import *
 from gists_display import *
 from repo_display import RepoInfoDisplayObject
+from follow_display import *
 from caching import *
 
 
@@ -65,12 +66,22 @@ def info_user(*clas):
                                                options.repos, user_info['repos_url']).display()
     elif options.gists:
         program_name()
+        UserInfoDisplayObject(user_info).display()
+        nl()
         UserGistsDisplayObjectFactory.forGists(user,
                                                options.gists, user_info['gists_url'][:-10]).display()
     elif options.following:
-        pass
+        program_name()
+        UserInfoDisplayObject(user_info).display()
+        nl()
+        UserFollowDisplayObjectFactory.forFollow(
+            user, 'following', options.following, user_info['following_url'][:-13]).display()
     elif options.followers:
-        pass
+        program_name()
+        UserInfoDisplayObject(user_info).display()
+        nl()
+        UserFollowDisplayObjectFactory.forFollow(
+            user, 'followers', options.followers, user_info['followers_url']).display()
 
 
 class NoReposDisplayObject(DisplayObject):
