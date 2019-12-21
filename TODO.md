@@ -22,5 +22,5 @@
   - [x]  user followers list
   - [x] *list items should be cached by page for easy retrieval*
     - **They are!**
-- [ ]  Invalidate caches after a certain (configurable?) amount of time
+- [x]  Invalidate caches after a certain ~~(configurable?)~~ amount of time
 - [x]  Fix `-g all` for the user option. See #2
