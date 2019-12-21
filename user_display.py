@@ -53,6 +53,9 @@ def info_user(*clas):
     if not response_check(user_info, user):
         return
 
+    # creates the correct DisplayObjects based on the options passed in by the user
+    # Use of factories and polymorphismhelps to abstract away the choices
+    #  around -X all, -X pPAGE, etc.
     if options.repos is False and options.gists is False and options.followers is False and options.following is False:
         program_name()
         UserInfoDisplayObject(user_info).display()

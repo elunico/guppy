@@ -11,6 +11,9 @@ from caching import *
 
 
 def dispatch():
+    """
+    Checks initial arugments (MODE and ARGUMENT) and dispatches to the correct function for further processing
+    """
     if len(sys.argv) < 2:
         print(usage)
         return
@@ -50,6 +53,9 @@ def dispatch():
 
 def main():
     dispatch()
+    # CACHE_END MUST BE CALLED BEFORE THE PROGRAM EXITS
+    # BUT AFTER *ALL* CACHE ACTIONS HAVE BEEN PERFORMED
+    # TO ENSURE THE CORRECT FUNCTIONALITY OF THE CACHE
     cache_end()
 
 

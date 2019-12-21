@@ -17,11 +17,19 @@ usage = "Usage: {0} mode. Try '{0} help' for help".format(sys.argv[0])
 
 
 def formatted_time(isotime, localeString="%A, %B %d, %Y at %I:%M%P %Z"):
+    """
+    Return an ISO time string formatted for locale
+    """
     dt = dateutil.parser.parse(isotime)
     return dt.strftime(localeString)
 
 
 def response_check(data, requested='resource'):
+    """
+    Check the status of the JSON returned by a GitHub reponse.
+    Prints an error if an error occurs and returns False
+    otherwise returns True
+    """
     if 'message' in data:
         if data['message'] == 'Not Found':
             putln(red, 'Error: {} not found!'.format(requested))
@@ -34,11 +42,20 @@ def response_check(data, requested='resource'):
 
 
 def expand_range(rangeString):
+    """
+    Turns page ranges into lists of pages.
+    E.g. turns 3-6 into [3, 4, 5, 6]
+    """
     s, e = [int(i) for i in rangeString.split('-')]
     return list(range(s, e + 1))
 
 
 def parse_pages(pagesString):
+    """
+    Turn a pages string into a list of pages
+    Turns 'p3,4,6-9' into [3,4,5,6,7,8,9].
+    The string MUST be prefixed with 'p'
+    """
     assert pagesString[0] == 'p'
     pagesString = pagesString[1:]
     each = pagesString.split(',')
@@ -51,7 +68,22 @@ def parse_pages(pagesString):
     return pages
 
 
-def get_max_pages(url):
+def get_max_pages(url):  # -> List[int]
+    """
+    Fetches data from `url` and uses the `Link` header,
+    if present, to find how many pages are needed to
+    retrieve all the data.
+
+    Returns two values
+
+    First it returns if there are more pages needed for the
+    resource than allowed by MAX_PAGES
+
+    Second It will return all pages until the number of
+    pages is equal to MAX_PAGES. It will not return a list of
+    pages that surpases MAX_PAGES. This list is a list of numbers
+    indicating which pages should be queried
+    """
     issue_req = requests.get(url)
     if 'Link' not in issue_req.headers:
         debug('Link header not found', yellow)
@@ -65,6 +97,18 @@ def get_max_pages(url):
 
 
 def fetch_data_page(source, page, base_url, list, caching=CACHING_ACTIVE):
+    """
+    A cache aware function that either gets a particular page from the cache
+    or requests from GitHub that page of data.
+    Works with user info: followers, following, gists, repos and
+    repo info: commits and issues.
+
+    source is the source either the username or repo (needed for cache retrieval)
+    page is the page (e.g. 1 or 2 or 4 etc.) to retrieve
+    base_url is the url of the resource to which "?page=X" is attached
+    list is the a string that indicates the kind of data that is retrieved any of 'following', 'followers', 'gists', 'repos', 'commits', or 'issues'
+    caching indicates whether to use caching
+    """
     if not caching:
         req = requests.get(base_url + "?page={}".format(page))
         if not response_check(req):
@@ -100,9 +144,14 @@ def fetch_data_page(source, page, base_url, list, caching=CACHING_ACTIVE):
 
 
 def get_all_data_pages(source, pages_list, base_url, list):
+    """
+    Retrieves all the pages_list pages of `list` kind of data (followers,
+    following, gists, repos, commits, or issues) either from the cache
+    if present or by making a request to base_url for the user or repo
+    specified by source
+    """
     all_data = {}
     for page in pages_list:
-        # issue_req = requests.get(base_url + "?page={}".format(page))
         info = fetch_data_page(source, page, base_url, list)
         if not info:
             return {}
@@ -111,6 +160,15 @@ def get_all_data_pages(source, pages_list, base_url, list):
 
 
 def get_all_pages_warned(source, base_url, list_):
+    """
+    Determines the number of pages required to send back the
+    type of resource specified by list_ (followers,
+    following, gists, repos, commits, or issues) and prints a
+    warning if it takes more than MAX_PAGES pages to do so.
+    Source is the user or repo from which the `list_` data is
+    coming. Data is either retrieved from cache or by requesting
+    base_url
+    """
     (overflow, pages_list) = get_max_pages(base_url)
     if overflow:
         putln(yellow, "Warning: only first {} pages of {} total pages of "
@@ -122,6 +180,10 @@ def get_all_pages_warned(source, base_url, list_):
 
 
 def rate_limit_check(req):
+    """
+    Checks the headers of a requests response object
+    and prints a warning if rate limiting will soon take affect
+    """
     if 'X-RateLimit-Remaining' in req.headers:
         left = int(req.headers['X-RateLimit-Remaining'])
         if left < 20:

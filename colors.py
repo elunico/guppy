@@ -23,10 +23,13 @@ def nl():
 
 
 def clear():
+    """
+    Clears the current output color. Does NOT clear the terminal
+    """
     print(black, end='')
 
 
-def color_for_license(license):
+def color_for_license(license: dict):
     if license['key'] in ['mit', 'unlicense', 'wtfpl', 'gpl-2.0', 'lgpl-2.1', 'mpl-2.0', 'apache-2.0']:
         return green
     else:
@@ -34,5 +37,8 @@ def color_for_license(license):
 
 
 def putEntry(key, value, keyColor=bold, valueColor=black):
+    """
+    Write a key value pair to the console in a nicely formatted way
+    """
     putln("{}{}: {}{}".format(keyColor, key, valueColor, value))
     clear()

@@ -18,6 +18,9 @@ except (IndexError, ValueError, AttributeError):
 
 
 def boxed(msg, center=CONSOLE_WIDTH - 4):
+    """
+    print `msg` in a box centered on the terminal
+    """
     items = msg.splitlines()
     print('-' * CONSOLE_WIDTH)
     for line in items:
@@ -27,6 +30,12 @@ def boxed(msg, center=CONSOLE_WIDTH - 4):
 
 
 class DisplayObject:
+    """
+    The base class for all display objects. Display objects
+    print data in a nicely formatted way to the console depending
+    on which Objects they are. This class is for polymorphish
+    """
+
     def __init__(self, data):
         self.data = data
 
@@ -36,6 +45,12 @@ class DisplayObject:
 
 
 class LongTextDisplayObject(DisplayObject):
+    """
+    This class uses textwrap to display large blocks of text
+    to the console in a human-readable way that is conscious of
+    indents and word-wraps. Can also display colors
+    """
+
     def __init__(self, string, width, places):
         super().__init__(string)
         self.width = width
@@ -59,6 +74,13 @@ class LongTextDisplayObject(DisplayObject):
 
 
 class TitleDisplayer:
+    """
+    Base class for title displayers. Some display objects
+    delegate showing a title to a subclass for the purpose
+    of injection. This allows titles to be shown differently
+    according to the use of the DisplayObjet subclass
+    """
+
     def show_title(self, string):
         raise NotImplementedError('Abstract Class')
 
@@ -77,11 +99,15 @@ def program_name():
     print("~*~*~*~* G I T H U B    C O N S O L E *~*~*~*~".center(CONSOLE_WIDTH))
 
 
-def commify(numberText: str) -> str:
-    return '{:,}'.format(numberText)
+def commify(number: int) -> str:
+    "formats a int to be printed with commas"
+    return '{:,}'.format(number)
 
 
 def fmt_bytes(bytes: int) -> str:
+    """
+    Prints out a human readable bytes amount for a given number of bytes
+    """
     if bytes > 1000000000:
         return '{:.2f} GB'.format(bytes / 1000000000)
     if bytes > 1000000:
