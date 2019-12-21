@@ -74,10 +74,13 @@ def fetch_data_page(source, page, base_url, list, caching=CACHING_ACTIVE):
             return []
         return info
     else:
-        if list in ['followers', 'follwing', 'gists', 'repos']:
+        if list in ['followers', 'following', 'gists', 'repos']:
             cached = get_cached_user_list(source,  list, page)
         elif list in ['commits', 'issues']:
             cached = get_cached_repo_list(source, list, page)
+        else:
+            raise AssertionError(
+                'Value {} was unexpected for argument list in fetch_data_page'.format(list))
         if cached:
             debug('cache hit fetch data page', green)
             return cached
@@ -89,7 +92,7 @@ def fetch_data_page(source, page, base_url, list, caching=CACHING_ACTIVE):
             info = req.json()
             if not info:
                 return []
-            if list in ['followers', 'follwing', 'gists', 'repos']:
+            if list in ['followers', 'following', 'gists', 'repos']:
                 cache_user_list(source, list, page, info)
             elif list in ['commits', 'issues']:
                 cache_repo_list(source, list, page, info)

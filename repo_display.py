@@ -11,8 +11,8 @@ import dateutil.parser
 
 def parse_repo_args(args):
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        'repo', help='The repo to get information on. Must be in the form of USER/REPO')
+    parser.add_argument('repo',
+                        help='The repo to get information on. Must be in the form of USER/REPO')
     parser.add_argument('-i', '--issues', default=False,
                         help='List all issues on the repo using `all` or a specific issue using `-i NUMBER` or a specific page of issues using -i pNUMBER or -i pFROM-THROUGH or -i pPAGENO,PAGENO2,PAGENO3 or any combination of those. Pages will be returned in the order given and will NOT be sorted (Note all will not display more than 20 pages of issues)')
     parser.add_argument('-c', '--commits', default=False,
@@ -89,8 +89,9 @@ def info_repo(*clas):
         program_name()
         RepoInfoDisplayObject(repo_info).display()
         nl()
-        o = IssueDisplayObjectFactory.forIssue(
-            '{}/{}'.format(user, repo), options.issues, repo_info['issues_url'][:-9]).display()
+        o = IssueDisplayObjectFactory.forIssue('{}/{}'.format(user, repo),
+                                               options.issues,
+                                               repo_info['issues_url'][:-9]).display()
     elif options.commits:
         program_name()
         RepoInfoDisplayObject(repo_info).display()

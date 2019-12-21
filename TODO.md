@@ -6,9 +6,9 @@
 - [x] Add pagination for commits like issues
 - [x] Add pagination for gists like issues
 - [x] Add pagination for repos like issues
-- [ ] Add user followers with pages
-- [ ] Add user following with pages
-- [ ] Add caching for
+- [x] Add user followers with pages
+- [x] Add user following with pages
+- [x] Add caching for
   - [x]  user info
   - [x]  repo info
   - [x]  repo language info
@@ -18,8 +18,8 @@
   - [x]  user gists list,
   - [x]  full issues
   - [x]  full commits
-  - [ ]  user following list ,
-  - [ ]  user followers list
+  - [x]  user following list ,
+  - [x]  user followers list
   - [x] *list items should be cached by page for easy retrieval*
     - **They are!**
 - [ ]  Invalidate caches after a certain (configurable?) amount of time
