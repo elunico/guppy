@@ -3,7 +3,7 @@ import os
 import msgpack
 import time
 from colors import *
-from display import commify, fmt_bytes
+from display import commify, fmt_bytes, LongTextDisplayObject, CONSOLE_WIDTH
 from typing import Union
 from typing import Optional
 from typing import Dict
@@ -47,6 +47,10 @@ def cacheTo(*args):
     return os.path.join(cache_path, *args)
 
 
+# create dirs for cache storage
+if not os.path.isdir(cache_path):
+    os.makedirs(cache_path)
+
 TimeStamp = float
 FileName = str
 
@@ -57,9 +61,6 @@ else:
     with open(index_path, 'rb') as f:
         index = unserialize(f.read())
 
-# create dirs for cache storage
-if not os.path.isdir(cache_path):
-    os.makedirs(cache_path)
 
 # later we will read in the settings from these files
 # if the files are not present we first write defaults
@@ -74,7 +75,7 @@ if not os.path.exists(size_path):
 
 if not os.path.exists(time_path):
     with open(time_path, 'w') as f:
-        f.write('86400')
+        f.write('1d')
 
 
 def size_for(s):
@@ -112,13 +113,46 @@ def size_for(s):
     return int(v) * m
 
 
+def time_for(s):
+    """
+    Given a time stirng, returns a number of seconds that
+    corresponds to that time. For a plain number string
+    it returns the string as an int otherwise it converts
+    based on the last char of the string when it is one of
+    the following:
+    m -> Minutes
+    h -> hours
+    d -> days
+    w -> weeks
+    """
+    try:
+        return int(s)
+    except:
+        pass
+    denom = s[-1]
+    m = 1
+    value = s[:-1]
+    if denom == 'm':
+        m = 60
+    elif denom == 'h':
+        m = 3600
+    elif denom == 'd':
+        m = 86400
+    elif denom == 'w':
+        m = 604800
+    else:
+        raise ValueError(
+            "Invalid time denomination! Must be m, h, d, w or nothing not {}".format(denom))
+    return int(value) * m
+
+
 # read in settings
 with open(state_path) as f:
     CACHING_ACTIVE = f.read() == 'start'
 with open(size_path) as f:
     MAX_CACHE_SIZE = size_for(f.read())
 with open(time_path) as f:
-    MAX_CACHE_SECONDS = float(f.read())
+    MAX_CACHE_SECONDS = time_for(f.read())
 
 
 # this function removes records that are too old (expired)
@@ -129,16 +163,23 @@ def prune_expired_caches():
     # index is sorted by time, oldest times towards 0
     # while the oldest items are older than the MAX
     # remove those items
+    if len(entries) > 0 and now - entries[0][1] > MAX_CACHE_SECONDS:
+        # only print message if there's items to remove
+        putln(black, 'Pruning expired cache data. Please wait...')
+    count = 0
     while len(entries) > 0 and now - entries[0][1] > MAX_CACHE_SECONDS:
         path = cacheTo(entries.pop(0)[0])
         assert '.guppy' in path
         try:
             os.remove(path)
+            count += 1
             debug('Removing {} because it is too old'.format(path), magenta)
         except FileNotFoundError:
             debug('File {} in index but not found on delete. '.format(path), yellow)
 
     index = {k: v for (k, v) in entries}
+    if count > 0:
+        putln(green, 'Removed {} expired cache files'.format(count))
 
 
 # anytime someone imports caching, and caching active according
@@ -303,6 +344,8 @@ def cache_action(action: str):
         print("Deleted {} cached records.".format(count))
     elif action == 'check':
         print("Using cache?: {}".format(CACHING_ACTIVE))
+        print("Cache data expires after: {:,} seconds".format(
+            MAX_CACHE_SECONDS))
         print("Cache max size: {}".format(fmt_bytes(MAX_CACHE_SIZE)))
         csize = get_cache_size()
         print("Cache current size: {} bytes".format(fmt_bytes(csize)))
@@ -330,13 +373,26 @@ def cache_action(action: str):
         with open(size_path, 'w') as f:
             f.write('{}'.format(value))
         print('Cache max size set to {:,} bytes'.format(value))
+    elif action.startswith('time:'):
+        value = time_for(action[5:])
+        with open(time_path, 'w') as f:
+            f.write('{}'.format(value))
+        print('Set cache expiration time to {:,} seconds'.format(value))
     elif action == 'help':
-        print('Caching options for guppy:')
-        print('  CLEAR   -> delete all cache files.')
-        print('  STOP    -> stop caching data.')
-        print('  START   -> begin caching data.')
-        print('  CHECK   -> print current cache status.')
-        print('  SIZE:nD -> Change the maximum size of the cache where n is the amount and D is the denomination: k (kilobytes), m (megabytes), g (gigabytes).')
+        LongTextDisplayObject('Caching options for guppy:',
+                              CONSOLE_WIDTH, 0).display()
+        nl()
+        LongTextDisplayObject(
+            'CLEAR   -> delete all cache files.', CONSOLE_WIDTH, 0).display()
+        LongTextDisplayObject(
+            'STOP    -> stop caching data.', CONSOLE_WIDTH, 0).display()
+        LongTextDisplayObject(
+            'START   -> begin caching data.', CONSOLE_WIDTH, 0).display()
+        LongTextDisplayObject(
+            'CHECK   -> print current cache status.', CONSOLE_WIDTH, 0).display()
+        LongTextDisplayObject(
+            'SIZE:nD -> Change the maximum size of the cache where n is the amount and D is the denomination: k (kilobytes), m (megabytes), g (gigabytes). If D is omitted, the default is bytes', CONSOLE_WIDTH, 0).display()
+        LongTextDisplayObject('TIME:nD -> Change the amount of time before cache data expires where n is the amount of time and D is the denomination: m (minutes), h (hours), d (days), or w (weeks). If D is omitted, the default is seconds.', CONSOLE_WIDTH, 0).display()
     else:
         print("Invalid action {}. Try python3 guppy.py cache help")
 
