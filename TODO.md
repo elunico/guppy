@@ -1,7 +1,10 @@
 # Things to do
 - [ ] Add option for -c HEAD to retrieve the most recent commit
+- [ ] Show the HEAD commit in the summary info
+- [ ] Add option to view branches?
+- [ ] Add option to view contributors?
 - [x] Add ability to get information using USER mode including list of repos
-- [ ] Add mypy typing? (maybe)
+- [ ] ~~Add mypy typing? (maybe)~~
 - [x] Change Multiple{Issue,Commit}DisplayObject to only print titles/shas and dates and not the full description/message of the issue/commit. Single{Issue,Commit}DisplayObject should still print all information
 - [x] Add pagination for commits like issues
 - [x] Add pagination for gists like issues
@@ -22,5 +25,5 @@
   - [x]  user followers list
   - [x] *list items should be cached by page for easy retrieval*
     - **They are!**
-- [x]  Invalidate caches after a certain ~~(configurable?)~~ amount of time
+- [x]  Invalidate caches after a certain (configurable?) amount of time
 - [x]  Fix `-g all` for the user option. See #2
