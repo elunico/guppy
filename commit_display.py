@@ -3,6 +3,7 @@ from utils import *
 import requests
 from repo_display import *
 from display import *
+import pprint
 
 
 def fetch_commit(repo, commit, commits_url, caching=CACHING_ACTIVE):
@@ -37,6 +38,22 @@ class CommitDisplayFactory:
         `commit` is the string passed on the command line specifying
         which commits want to be seen. It is either all, pPAGES, or a commit SHA
         """
+        if commit == 'HEAD':
+            data = get_all_data_pages(
+                repo, [1], commits_url, 'commits', caching=False)
+            if not data:
+                return NoCommitDisplayObject()
+            # remember get_all_data_pages returns a dict of page number to list of resources (dict)
+            commit = data[1][0]
+            sha = commit['sha']
+            # the data gotten by /commits has less information than /commits/:sha
+            # so we need to find the head without using cache then retrieve that
+            # commit. Once we are sure which commit is HEAD, we can try to get it
+            # from the cache
+            info = fetch_commit(repo, sha, commits_url)
+            if not info:
+                return NoCommitDisplayObject()
+            return SingleLongCommitDisplayObject(info)
         if commit == 'all':
             all_commits = []
             # get_all_data_pages and get_all_pages_warned are

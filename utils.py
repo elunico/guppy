@@ -144,7 +144,7 @@ def fetch_data_page(source, page, base_url, list, caching=CACHING_ACTIVE):
             return info
 
 
-def get_all_data_pages(source, pages_list, base_url, list):
+def get_all_data_pages(source, pages_list, base_url, list, caching=CACHING_ACTIVE):
     """
     Retrieves all the pages_list pages of `list` kind of data (followers,
     following, gists, repos, commits, issues, branches, contributors)
@@ -153,7 +153,7 @@ def get_all_data_pages(source, pages_list, base_url, list):
     """
     all_data = {}
     for page in pages_list:
-        info = fetch_data_page(source, page, base_url, list)
+        info = fetch_data_page(source, page, base_url, list, caching=caching)
         if not info:
             return {}
         all_data[page] = info
