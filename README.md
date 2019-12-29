@@ -41,7 +41,7 @@ Once cloned or downloaded, simply `cd` into the folder and use
 - For repos it has the form `USERNAME/REPO`.
 *Providing this argument without additional `OPTIONS` will show summary information on the user or repo that is specified.*
 
-- For cache mode, it has the form `(start | stop | check | clear)`. Meaning you can pass one of these four options to take some action with the cache
+- For cache mode, it has the form `(start | stop | check | size:nD | time:nD | clear)`. Meaning you can pass one of these four options to take some action with the cache
 
 `[OPTIONS...]` are optional additional options regarding what information should be returned and printed to the console. More information can be found below.
 *Note: options are not allowed for `cache` mode*
@@ -51,6 +51,8 @@ Once cloned or downloaded, simply `cd` into the folder and use
 For repositories in `repo` mode
 - `-i ISSUE` Get information about the issues in the repo. use `-i all` to see all issues (or several if there are many), `-i NUMBER` to see a particular issue, or `-i pPAGE_SPEC` for a particular page or pages
 - `-c COMMIT` Get information about the commits in the repo. use `-c all` to see all commits (or several if there are many),  `-c HASH` to see a particular commit, or `-c pPAGE_SPEC` to see a particular page or pages.
+  - You can also specify `-c HEAD`. This will fetch the head commit of the default branch of the repo and then display it. This option always makes a request to find the HEAD commit, but if it is cached, it will retrieve it from the cache.
+- `-b BRANCH` Get informatino about the branches in the repo. Use `-b all` to see all commits (or several if there are many),  `-b NAME` to see a particular commit, or `-b pPAGE_SPEC` to see a particular page or pages.
 
 For users in `user` mode
 - `-g GIST` Get information about the gists of the user. use `-g all` to see all gists (or several if there are many), `-g ID` to see a particular gist, or `-g pPAGE_SPEC` for a particular page or pages
@@ -59,6 +61,13 @@ For users in `user` mode
 - `--followers FOLLOW` Get information about the user's followers. use `--followers all` to see all the usere's followers (or several if there are many) or `-i pPAGE_SPEC` for a particular page or pages. To see a particular follower, use regular `user` mode
 
 more options may be added in the future
+
+For `cache` mode
+- `start` indicates you wish to use caching
+- `stop` indicates you do not want any cache access. All invocations of the program will make requests ot GitHub
+- `clear` removes all data from the cache. New invocations will make requests to GitHub
+- `size:nD` changes the maximum size of the cache. `n` is a number and `D` is a denomination. `D` can be `k` for kilobytes, `m` for megabytes, or `g` for gigabytes. You can also leave it off to indicate bytes. So, for instance, `30m` would be 30 megabytes `100k` is 100 kilobytes etc.
+- `time:nD` changes the maximum amount of time to keep data in the cache. `n` is a number and `D` is a denomination. `D` can be `m` for minutes, `h` for hours, `d` for days. You can leave it off for seconds. For instnace, `30m` indicates cache data will be deleted after 30 minutes. `1d` indicates cache data will be deleted after 1 day (24 hours), etc.
 
 ## `PAGE_SPEC`
 
