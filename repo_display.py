@@ -5,6 +5,7 @@ import argparse
 from display import *
 from issue_display import *
 from commit_display import *
+from branch_display import *
 from caching import *
 import dateutil.parser
 
@@ -15,6 +16,8 @@ def parse_repo_args(args):
                         help='The repo to get information on. Must be in the form of USER/REPO')
     parser.add_argument('-i', '--issues', default=False,
                         help='List all issues on the repo using `all` or a specific issue using `-i NUMBER` or a specific page of issues using -i pNUMBER or -i pFROM-THROUGH or -i pPAGENO,PAGENO2,PAGENO3 or any combination of those. Pages will be returned in the order given and will NOT be sorted (Note all will not display more than 20 pages of issues)')
+    parser.add_argument('-b', '--branches', default=False,
+                        help='List all branches on the repo using `all` or a specific branch using `-b NUMBER` or a specific page of branches using -b pNUMBER or -b pFROM-THROUGH or -b pPAGENO,PAGENO2,PAGENO3 or any combination of those. Pages will be returned in the order given and will NOT be sorted (Note all will not display more than 20 pages of branches)')
     parser.add_argument('-c', '--commits', default=False,
                         help='List all commits on the repo using `all` or a specific commit using `-c HASH`')
     return parser.parse_args(args)
@@ -89,7 +92,7 @@ def info_repo(*clas):
             return
 
     # creates the correct DisplayObjects based on the options passed in by the user
-    if options.issues is False and options.commits is False:
+    if options.issues is False and options.commits is False and options.branches is False:
         program_name()
         RepoInfoDisplayObject(repo_info).display()
         RepoExtraInfoDisplayObject(repo_info).display()
@@ -107,6 +110,14 @@ def info_repo(*clas):
         nl()
         o = CommitDisplayFactory.forCommit('{}/{}'.format(user, repo),
                                            options.commits, repo_info['commits_url'][:-6]).display()
+    elif options.branches:
+        program_name()
+        RepoInfoDisplayObject(repo_info).display()
+        nl()
+        BranchDisplayFactory.forBranch(
+            '{}/{}'.format(user, repo), options.branches, repo_info['branches_url'][:-9]).display()
+    else:
+        raise ValueError("Invalid option for REPO!")
 
 
 class RepoInfoDisplayObject(DisplayObject):
@@ -139,7 +150,9 @@ class RepoInfoDisplayObject(DisplayObject):
         nl()
         puts(bold, "Link: ")
         puts(blue + uline, find_at)
+        clear()
         nl()
+        putEntry('Default Branch', self.repo_info['default_branch'])
         clear()
         if self.repo_info['private']:
             putEntry('Visibility', 'private', valueColor=red)

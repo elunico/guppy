@@ -102,7 +102,7 @@ def fetch_data_page(source, page, base_url, list, caching=CACHING_ACTIVE):
     A cache aware function that either gets a particular page from the cache
     or requests from GitHub that page of data.
     Works with user info: followers, following, gists, repos and
-    repo info: commits and issues.
+    repo info: commits, issues, branches, contributors.
 
     source is the source either the username or repo (needed for cache retrieval)
     page is the page (e.g. 1 or 2 or 4 etc.) to retrieve
@@ -121,7 +121,7 @@ def fetch_data_page(source, page, base_url, list, caching=CACHING_ACTIVE):
     else:
         if list in ['followers', 'following', 'gists', 'repos']:
             cached = get_cached_user_list(source,  list, page)
-        elif list in ['commits', 'issues']:
+        elif list in ['commits', 'issues', 'branches', 'contributors']:
             cached = get_cached_repo_list(source, list, page)
         else:
             raise AssertionError(
@@ -139,7 +139,7 @@ def fetch_data_page(source, page, base_url, list, caching=CACHING_ACTIVE):
                 return []
             if list in ['followers', 'following', 'gists', 'repos']:
                 cache_user_list(source, list, page, info)
-            elif list in ['commits', 'issues']:
+            elif list in ['commits', 'issues', 'branches', 'contributors']:
                 cache_repo_list(source, list, page, info)
             return info
 
@@ -147,9 +147,9 @@ def fetch_data_page(source, page, base_url, list, caching=CACHING_ACTIVE):
 def get_all_data_pages(source, pages_list, base_url, list):
     """
     Retrieves all the pages_list pages of `list` kind of data (followers,
-    following, gists, repos, commits, or issues) either from the cache
-    if present or by making a request to base_url for the user or repo
-    specified by source
+    following, gists, repos, commits, issues, branches, contributors)
+    either from the cache if present or by making a request to
+    base_url for the user or repo specified by source
     """
     all_data = {}
     for page in pages_list:
@@ -164,11 +164,11 @@ def get_all_pages_warned(source, base_url, list_):
     """
     Determines the number of pages required to send back the
     type of resource specified by list_ (followers,
-    following, gists, repos, commits, or issues) and prints a
-    warning if it takes more than MAX_PAGES pages to do so.
-    Source is the user or repo from which the `list_` data is
-    coming. Data is either retrieved from cache or by requesting
-    base_url
+    following, gists, repos, commits, issues, branches, or contributors)
+    and prints a warning if it takes more than MAX_PAGES
+    pages to do so. Source is the user or repo from which
+    the `list_` data is coming. Data is either retrieved from
+    cache or by requesting base_url
     """
     (overflow, pages_list) = get_max_pages(base_url)
     if overflow:

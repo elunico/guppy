@@ -74,6 +74,16 @@ class NoCommitDisplayObject(DisplayObject):
         print(bold, "No commits.")
 
 
+def colorForStatus(status):
+    if status == 'modified':
+        return yellow
+    if status == 'added':
+        return green
+    if status == 'deleted':
+        return red
+    return 'MISSING COLOR'
+
+
 class SingleLongCommitDisplayObject(DisplayObject):
     def __init__(self, issue_data):
         super().__init__(issue_data)
@@ -86,6 +96,29 @@ class SingleLongCommitDisplayObject(DisplayObject):
         message = self.data['commit']['message']
         LongTextDisplayObject(message, CONSOLE_WIDTH - 4, 4).display(magenta)
         clear()
+        nl()
+        puts(black, '  ')
+        putln(bold + uline, 'Files changed:')
+        clear()
+        nl()
+        for f in self.data['files']:
+            puts(black, '    ')
+            puts(colorForStatus(f['status']), '[{}] ' .format(f['status']))
+            clear()
+            puts(bold, f['filename'])
+            clear()
+            puts(black, ' (')
+            puts(green, '+{}'.format(f['additions']))
+            puts(black, ', ')
+            puts(red, '-{}'.format(f['deletions']))
+            puts(black, ', ')
+            puts(yellow, '±{}'.format(f['changes']))
+            puts(black, ')')
+            clear()
+            nl()
+            clear()
+            nl()
+
         putln(black, '=' * CONSOLE_WIDTH)
         nl()
 

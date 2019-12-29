@@ -115,3 +115,25 @@ def fmt_bytes(bytes: int) -> str:
     if bytes > 1000:
         return '{:.2f} KB'.format(bytes / 1000)
     return "{} B".format(bytes)
+
+
+def fmt_seconds(seconds: int) -> str:
+    """
+    Prints out a human readable amount of time based on passed in seconds
+    """
+    days = seconds // 86400
+    seconds %= 86400
+    hours = seconds // 3600
+    seconds %= 3600
+    minutes = seconds // 60
+    seconds %= 60
+    r = []
+    if days != 0:
+        r += ['{} days'.format(days)]
+    if hours != 0:
+        r += ['{} hours'.format(hours)]
+    if minutes != 0:
+        r += ['{} minutes'.format(minutes)]
+    if seconds != 0:
+        r += ['{} seconds'.format(seconds)]
+    return ', '.join(r).strip()

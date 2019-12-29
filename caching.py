@@ -3,7 +3,7 @@ import os
 import msgpack
 import time
 from colors import *
-from display import commify, fmt_bytes, LongTextDisplayObject, CONSOLE_WIDTH
+from display import commify, fmt_bytes, fmt_seconds, LongTextDisplayObject, CONSOLE_WIDTH
 from typing import Union
 from typing import Optional
 from typing import Dict
@@ -247,9 +247,16 @@ def cache_commit(qrepo: str, sha: str, data: dict) -> int:
     return cache_item(path, data)
 
 
+def cache_branch(qrepo: str, name: str, data: dict) -> int:
+    qrepo = qrepo.replace('/', '-')
+    name = name.replace('/', '-')
+    path = 'repo.{}.branch.{}'.format(qrepo, name)
+    return cache_item(path, data)
+
+
 def cache_repo_list(qrepo: str, list: str, page: str, data: list) -> int:
     '''
-    `list` param should be issues or commits
+    `list` param should be issues, commits, branches, or contributors
     '''
     qrepo = qrepo.replace('/', '-')
     path = 'repo.{}.{}.p{}'.format(qrepo, list, page)
@@ -278,9 +285,17 @@ def retrieve_cached_item(path):
 
 # the following are several convenience functions for retrieving cache
 # files by data name that delegate to retrieve_cached_item
+
+def get_cached_branch(qrepo: str, name: str):
+    qrepo = qrepo.replace('/', '-')
+    name = name.replace('/', '-')
+    path = 'repo.{}.branch.{}'.format(qrepo, name)
+    return retrieve_cached_item(path)
+
+
 def get_cached_repo_list(qrepo: str, list: str, page: str) -> int:
     '''
-    `list` param should be issues or commits
+    `list` param should be issues, commits, branches, or contributors
     '''
     qrepo = qrepo.replace('/', '-')
     path = 'repo.{}.{}.p{}'.format(qrepo, list, page)
@@ -344,8 +359,8 @@ def cache_action(action: str):
         print("Deleted {} cached records.".format(count))
     elif action == 'check':
         print("Using cache?: {}".format(CACHING_ACTIVE))
-        print("Cache data expires after: {:,} seconds".format(
-            MAX_CACHE_SECONDS))
+        print("Cache data expires after: {}".format(
+            fmt_seconds(MAX_CACHE_SECONDS)))
         print("Cache max size: {}".format(fmt_bytes(MAX_CACHE_SIZE)))
         csize = get_cache_size()
         print("Cache current size: {} bytes".format(fmt_bytes(csize)))
