@@ -13,10 +13,10 @@ It is named guppy for two reasons. 1) guppy ends in py and guppy is written in P
 #### Guppy requires the following things
 
 - A `python 3` installation.
-  - Guppy was created using `3.6.0` so it should work on anything `3.6.0` or later. It will not work on `2` and it may work earlier than `3.6.0`.
+  - Guppy was created using `3.6.0` so it should work on anything `3.6.0` or later. It will not work on `2` and it might or might not work on versions earlier than `3.6.0`.
 
 - **The `requests` module.** You can install it with `pip install requests`.
-  - The `requests` module is a friendly way of doing `http(s)` requests that is easily to write than python's `urllib` module.
+  - The `requests` module is a friendly way of doing `http(s)` requests that is easier to interface with than python's `urllib` module.
 
 - **The `dateutil.parser` module.** You can install it with  `pip install python-dateutil`.
   - This is used to show times in a locale-friendly way.
@@ -27,18 +27,22 @@ It is named guppy for two reasons. 1) guppy ends in py and guppy is written in P
 
 ## Usage
 
-Once cloned or downloaded, simply `cd` into the folder and use
+Once cloned or downloaded, and all the dependencies are installed, simply `cd` into the folder and use
 `python3 guppy.py MODE ARUGMENT [OPTIONS...]`
 
 `MODE` can be `repo`, `user`, or `cache`.
 
 - `user` allows you to retreive information around users
-- `repo` allows you to retrieve information on a repository. For more information on what additional information you can retrieve, see below.
-- `cache` allows you to get information and control the settings of the cache. Guppy will cache the data it fetches from GitHub's servers for some time to make data faster to access, and to avoid GitHub's rate limiting. It is stored in `~/.guppy/caches/` where `~` is the home folder of the user running Guppy. It stores additional data including settings and an index of the cache in `~/.guppy/`. Cache data expire after 1 day (but are not removed until the program is rerun after their expiration date) and can be manually cleared at any time.
+- `repo` allows you to retrieve information on a repository.
+
+For more information on what additional information you can retrieve, see below.
+
+- `cache` allows you to get information and control the settings of the cache. Guppy will cache the data it fetches from GitHub's servers for some time to make data faster to access, and to avoid GitHub's rate limiting. It is stored in `~/.guppy/caches/` where `~` is the home folder of the user running Guppy. It stores additional data including settings and an index of the cache in `~/.guppy/`. Cache data expires after 1 day by default but this can be changed. Cache items are not removed until the program is rerun after their expiration date, and can be manually cleared at any time.
 
 `ARGUMENT` is the repo or user that you want to get information about.
 - For users it has the form `USERNAME`
-- For repos it has the form `USERNAME/REPO`.
+- For repos it has the form `OWNER/REPO`, where `OWNER` is the username of the person who owns `REPO`
+
 *Providing this argument without additional `OPTIONS` will show summary information on the user or repo that is specified.*
 
 - For cache mode, it has the form `(start | stop | check | size:nD | time:nD | clear)`. Meaning you can pass one of these four options to take some action with the cache
@@ -52,7 +56,7 @@ For repositories in `repo` mode
 - `-i ISSUE` Get information about the issues in the repo. use `-i all` to see all issues (or several if there are many), `-i NUMBER` to see a particular issue, or `-i pPAGE_SPEC` for a particular page or pages
 - `-c COMMIT` Get information about the commits in the repo. use `-c all` to see all commits (or several if there are many),  `-c HASH` to see a particular commit, or `-c pPAGE_SPEC` to see a particular page or pages.
   - You can also specify `-c HEAD`. This will fetch the head commit of the default branch of the repo and then display it. This option always makes a request to find the HEAD commit, but if it is cached, it will retrieve it from the cache.
-- `-b BRANCH` Get informatino about the branches in the repo. Use `-b all` to see all commits (or several if there are many),  `-b NAME` to see a particular commit, or `-b pPAGE_SPEC` to see a particular page or pages.
+- `-b BRANCH` Get information about the branches in the repo. Use `-b all` to see all branches (or several if there are many),  `-b NAME` to see a particular branch, or `-b pPAGE_SPEC` to see a particular page or pages.
 
 For users in `user` mode
 - `-g GIST` Get information about the gists of the user. use `-g all` to see all gists (or several if there are many), `-g ID` to see a particular gist, or `-g pPAGE_SPEC` for a particular page or pages
@@ -63,9 +67,9 @@ For users in `user` mode
 more options may be added in the future
 
 For `cache` mode
-- `start` indicates you wish to use caching
-- `stop` indicates you do not want any cache access. All invocations of the program will make requests ot GitHub
-- `clear` removes all data from the cache. New invocations will make requests to GitHub
+- `start` indicates you wish to use caching. Data will be kept for the specified amount of time (1 day default) but no more than the maximum amount of data will be kept (10 MB by default).
+- `stop` indicates you do not want any cache access. All invocations of the program will make requests ot GitHub. No cache data will be removed by this option.
+- `clear` removes all data from the cache.
 - `size:nD` changes the maximum size of the cache. `n` is a number and `D` is a denomination. `D` can be `k` for kilobytes, `m` for megabytes, or `g` for gigabytes. You can also leave it off to indicate bytes. So, for instance, `30m` would be 30 megabytes `100k` is 100 kilobytes etc.
 - `time:nD` changes the maximum amount of time to keep data in the cache. `n` is a number and `D` is a denomination. `D` can be `m` for minutes, `h` for hours, `d` for days. You can leave it off for seconds. For instnace, `30m` indicates cache data will be deleted after 30 minutes. `1d` indicates cache data will be deleted after 1 day (24 hours), etc.
 
