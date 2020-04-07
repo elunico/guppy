@@ -26,6 +26,9 @@ def dispatch():
         LongTextDisplayObject('{0}{1} repo USER/REPO{2}: retrieve information about REPO. Note that it must be qualified by a username. Use `repo -h` for more information'.format(
             bold, sys.argv[0], black), CONSOLE_WIDTH - 2, 2).display()
         nl()
+        LongTextDisplayObject('{0}{1} cache OPTIONS{2}: retrieve information about the cache and change settings regarding it. Try ./guppy cache help for more information'.format(
+            bold, sys.argv[0], black), CONSOLE_WIDTH - 2, 2).display()
+        nl()
         print('  {}{} help{}: print this message'.format(
             bold, sys.argv[0], black))
         nl()
