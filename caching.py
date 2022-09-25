@@ -364,6 +364,7 @@ def cache_action(action: str):
         print("Cache max size: {}".format(fmt_bytes(MAX_CACHE_SIZE)))
         csize = get_cache_size()
         print("Cache current size: {} bytes".format(fmt_bytes(csize)))
+        print("Cache location: '{}'".format(cache_path))
     elif action == 'start':
         try:
             with open(state_path, 'w') as f:
