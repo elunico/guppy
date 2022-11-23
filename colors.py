@@ -1,3 +1,5 @@
+import os
+from typing import List
 magenta = '\033[95m'
 blue = '\033[94m'
 green = '\033[92m'
@@ -6,9 +8,6 @@ red = '\033[91m'
 black = '\033[0m'
 bold = '\033[1m'
 uline = '\033[4m'
-
-from typing import List
-import os
 
 
 def puts(color: str, *msgs: str, sep=' '):
@@ -37,11 +36,14 @@ def color_for_license(license: dict):
         return yellow
 
 
-def putEntry(key, value, keyColor=bold, valueColor=black):
+def putEntry(key, value, keyColor=bold, valueColor=black, keypad=None):
     """
     Write a key value pair to the console in a nicely formatted way
     """
-    putln("{}{}: {}{}".format(keyColor, key, valueColor, value))
+    key = '{}:'.format(key)
+    if keypad is not None:
+        key = key.rjust(keypad)
+    putln("{}{} {}{}".format(keyColor, key, valueColor, value))
     clear()
 
 

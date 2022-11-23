@@ -1,6 +1,7 @@
 import os.path
 import os
 import msgpack
+import sys
 import time
 from colors import *
 from display import commify, fmt_bytes, fmt_seconds, LongTextDisplayObject, CONSOLE_WIDTH
@@ -22,12 +23,20 @@ index_path = os.path.join(user_home, '.guppy', 'cache_index')
 time_path = os.path.join(user_home, '.guppy', 'max_seconds')
 
 
+def perror(message):
+    print(message, file=sys.stderr)
+
+
 def get_cache_size():
     s = 0
-    for f in os.listdir(cache_path):
-        path = os.path.join(cache_path, f)
-        if os.path.isfile(path):
-            s += os.path.getsize(path)
+    try:
+        for f in os.listdir(cache_path):
+            path = os.path.join(cache_path, f)
+            if os.path.isfile(path):
+                s += os.path.getsize(path)
+    except (IOError, OSError) as e:
+        perror("An error occurred while getting cache size: {}".format(e))
+        return -22
     return s
 
 
@@ -344,11 +353,14 @@ def get_cached_repo(qrepo: str) -> Optional[dict]:
 def clear_cache():
     global index
     c = 0
-    for file in os.listdir(cache_path):
-        os.remove(cacheTo(file))
-        c += 1
-
-    index = {}
+    try:
+        for file in os.listdir(cache_path):
+            os.remove(cacheTo(file))
+            c += 1
+        index = {}
+    except (OSError, IOError) as e:
+        perror('An error occurred while clearing the cache: {}'.format(e))
+        return -21
     return c
 
 
@@ -357,43 +369,62 @@ def cache_action(action: str):
     if action == 'clear':
         count = clear_cache()
         print("Deleted {} cached records.".format(count))
+        return 0 if count > 0 else -count
     elif action == 'check':
+        csize = get_cache_size()
+        if csize < 0:
+            return -csize
         print("Using cache?: {}".format(CACHING_ACTIVE))
         print("Cache data expires after: {}".format(
             fmt_seconds(MAX_CACHE_SECONDS)))
         print("Cache max size: {}".format(fmt_bytes(MAX_CACHE_SIZE)))
-        csize = get_cache_size()
         print("Cache current size: {} bytes".format(fmt_bytes(csize)))
         print("Cache location: '{}'".format(cache_path))
+        return 0
     elif action == 'start':
         try:
             with open(state_path, 'w') as f:
                 f.write('start')
         except Exception as e:
             print(red, 'Could not start caching: ' + str(e))
+            clear()
+            return 23
         else:
-            print(
-                green, 'Caching active! Previous, if any, and future cache data will be available starting now')
-        clear()
+            print(green, 'Caching active! Any previous cache data will also be available starting now')
+            clear()
+            return 0
     elif action == 'stop':
         try:
             with open(state_path, 'w') as f:
                 f.write('stop')
         except Exception as e:
             print(red, 'Could not disable caching: ' + str(e))
+            clear()
+            return 24
         else:
             print(green, 'Caching stopped! Future invocations will always result in requests to Github. Use CLEAR option to clear existing caches.')
-        clear()
+            clear()
+            return 0
     elif action.startswith('size:'):
-        value = size_for(action[5:])
-        with open(size_path, 'w') as f:
-            f.write('{}'.format(value))
-        print('Cache max size set to {:,} bytes'.format(value))
+        try:
+            value = size_for(action[5:])
+            with open(size_path, 'w') as f:
+                f.write('{}'.format(value))
+            print('Cache max size set to {:,} bytes'.format(value))
+            return 0
+        except (IOError, OSError) as e:
+            perror("Could not modify cache setting {}".format(e))
+            return 25
     elif action.startswith('time:'):
-        value = time_for(action[5:])
-        with open(time_path, 'w') as f:
-            f.write('{}'.format(value))
-        print('Set cache expiration time to {:,} seconds'.format(value))
+        try:
+            value = time_for(action[5:])
+            with open(time_path, 'w') as f:
+                f.write('{}'.format(value))
+            print('Set cache expiration time to {:,} seconds'.format(value))
+            return 0
+        except (IOError, OSError) as e:
+            perror("Could not modify cache setting {}".format(e))
+            return 26
     elif action == 'help':
         LongTextDisplayObject('Caching options for guppy:',
                               CONSOLE_WIDTH, 0).display()
@@ -409,8 +440,11 @@ def cache_action(action: str):
         LongTextDisplayObject(
             'SIZE:nD -> Change the maximum size of the cache where n is the amount and D is the denomination: k (kilobytes), m (megabytes), g (gigabytes). If D is omitted, the default is bytes', CONSOLE_WIDTH, 0).display()
         LongTextDisplayObject('TIME:nD -> Change the amount of time before cache data expires where n is the amount of time and D is the denomination: m (minutes), h (hours), d (days), or w (weeks). If D is omitted, the default is seconds.', CONSOLE_WIDTH, 0).display()
+        return 0
     else:
-        print("Invalid action {}. Try python3 guppy.py cache help")
+        perror("Invalid action {}. Try python3 guppy.py cache help".format(action))
+        perror("If you are trying to set size or time use the EXACT format specified in the help text")
+        return 29
 
 
 def cache_end():
@@ -422,5 +456,10 @@ def cache_end():
     IT WRITES THE INDEX OF THE CACHE OUT AND WITHOUT THE
     CACHE CANNOT PRUNE ITSELF
     """
-    with open(index_path, 'wb') as f:
-        f.write(serialize(index))
+    try:
+        with open(index_path, 'wb') as f:
+            f.write(serialize(index))
+        return 0
+    except (IOError, OSError) as e:
+        perror("Error saving cache: {}".format(e))
+        return 9

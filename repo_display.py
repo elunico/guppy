@@ -35,7 +35,12 @@ def fetch_repo_info(user, repo, url, caching=CACHING_ACTIVE):
         rate_limit_check(req)
         return repo_info
     else:
-        cached = get_cached_repo("{}/{}".format(user, repo))
+        try:
+            cached = get_cached_repo("{}/{}".format(user, repo))
+        except (IOError, OSError) as e:
+            perror("Could not query cache for data: {}".format(e))
+            cached = None
+
         if not cached:
             debug('repo cache miss', yellow)
             clear()
@@ -79,17 +84,22 @@ def fetch_repo_language(user, repo, url, caching=CACHING_ACTIVE):
 def info_repo(*clas):
     options = parse_repo_args(clas)
     user, repo = options.repo.split('/')
-    repo_info = fetch_repo_info(user, repo, repo_url)
+
+    try:
+        repo_info = fetch_repo_info(user, repo, repo_url)
+    except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError) as e:
+        perror("Could not retrieve data from internet {}".format(e))
+        return 41
 
     if 'message' in repo_info:
         if repo_info['message'] == 'Not Found':
             putln(red, 'Repo `{}` for user `{}` not found!'.format(repo, user))
             clear()
-            return
+            return 0
         else:
             putln(red, 'Error: {}'.format(repo_info['message']))
             clear()
-            return
+            return 0
 
     # creates the correct DisplayObjects based on the options passed in by the user
     if options.issues is False and options.commits is False and options.branches is False:
@@ -117,7 +127,10 @@ def info_repo(*clas):
         BranchDisplayFactory.forBranch(
             '{}/{}'.format(user, repo), options.branches, repo_info['branches_url'][:-9]).display()
     else:
-        raise ValueError("Invalid option for REPO!")
+        perror("No such option: {}".format(options))
+        return 49
+
+    return 0
 
 
 class RepoInfoDisplayObject(DisplayObject):
@@ -145,19 +158,23 @@ class RepoInfoDisplayObject(DisplayObject):
         # contexts. See display.py for more
         self.titler.show_title(self.get_title())
 
-        puts(bold, "Name: ")
-        puts(black, name)
-        nl()
-        puts(bold, "Link: ")
-        puts(blue + uline, find_at)
+        maxlen = len('Default Branch') + 1
+
+        # puts(bold, "Name: ".ljust(maxlen))
+        # puts(black, name)
+        putEntry('Name', name, keypad=maxlen)
+        # nl()
+        # puts(bold, "Link: ".ljust(maxlen))
+        # puts(blue + uline, find_at)
+        putEntry('Link', find_at, keypad=maxlen, valueColor=blue + uline)
         clear()
-        nl()
-        putEntry('Default Branch', self.repo_info['default_branch'])
+        # nl()
+        putEntry('Default Branch', self.repo_info['default_branch'], keypad=maxlen)
         clear()
         if self.repo_info['private']:
-            putEntry('Visibility', 'private', valueColor=red)
+            putEntry('Visibility', 'private', valueColor=red, keypad=maxlen)
         else:
-            putEntry('Visibility', 'public', valueColor=green)
+            putEntry('Visibility', 'public', valueColor=green, keypad=maxlen)
         clear()
         nl()
 
@@ -207,29 +224,28 @@ class RepoExtraInfoDisplayObject(DisplayObject):
         self.repo_info = repo_info
 
     def display(self):
+        maxlen = 14
         repo_info = self.data
         desc = repo_info['description']
         updated = formatted_time(repo_info['updated_at'])
-        putEntry('Last Updated', updated, valueColor=green)
+        putEntry('Last Updated', updated, valueColor=green, keypad=maxlen)
         clear()
-        nl()
+
         license = repo_info['license']
         if license and license != 'null':
-            puts(bold, 'License: ')
-            puts(color_for_license(license), license['name'])
             spdxid = license['spdx_id']
-            puts(color_for_license(license), " ({})".format(spdxid))
+            putEntry('License', license['name'] + " ({})".format(spdxid), valueColor=color_for_license(license),  keypad=maxlen)
             clear()
-            nl()
             nl()
         open_issues_count = repo_info['open_issues']
 
-        putEntry('Open Issues', commify(open_issues_count))
-        putEntry('Forks', commify(repo_info['forks']))
-        putEntry('Watchers', commify(repo_info['watchers']))
+        putEntry('Open Issues', commify(open_issues_count), keypad=maxlen)
+        putEntry('Forks', commify(repo_info['forks']), keypad=maxlen)
+        putEntry('Watchers', commify(repo_info['watchers']), keypad=maxlen)
         nl()
         clear()
-        putln(bold, "Description:")
+        putln(bold+uline, "Description")
+        clear()
         if not desc:
             putln(magenta, 'No description.')
         else:

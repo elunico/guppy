@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 
 import sys
-import requests
-import argparse
 from colors import *
 from utils import *
 from repo_display import *
@@ -16,7 +14,7 @@ def dispatch():
     """
     if len(sys.argv) < 2:
         print(usage)
-        return
+        return 1
     elif sys.argv[1].lower() == 'help':
         print(usage)
         nl()
@@ -32,35 +30,45 @@ def dispatch():
         print('  {}{} help{}: print this message'.format(
             bold, sys.argv[0], black))
         nl()
+        dispatch_result = 0
     elif sys.argv[1].lower() == 'cache':
         if len(sys.argv) < 3:
-            print("Error must specify action for cache mode")
-            return
-        cache_action(sys.argv[2])
+            perror("Error must specify action for cache mode")
+            return 20
+        dispatch_result = cache_action(sys.argv[2])
     elif sys.argv[1].lower() == 'user':
         if len(sys.argv) < 3:
-            print("Error must specify USER for user mode")
-            return
-        info_user(*sys.argv[2:])
+            perror("Error must specify a username for user mode")
+            return 30
+        dispatch_result = info_user(*sys.argv[2:])
     elif sys.argv[1].lower() == 'repo':
         if len(sys.argv) < 3:
-            print("Error must specify USER/REPO for repo mode")
-            return
+            perror("Error must specify USER/REPO for repo mode")
+            return 40
         if '/' not in sys.argv[2]:
-            print("Error must specify USER/REPO for repo mode")
-            return
-        info_repo(*sys.argv[2:])
+            perror("Error must specify USER/REPO for repo mode")
+            return 50
+        dispatch_result = info_repo(*sys.argv[2:])
     else:
-        print(usage)
+        perror(usage)
+        dispatch_result = 200
+
+    assert type(dispatch_result) is int
+    return dispatch_result
 
 
 def main():
-    dispatch()
+    result = dispatch()
     # CACHE_END MUST BE CALLED BEFORE THE PROGRAM EXITS
     # BUT AFTER *ALL* CACHE ACTIONS HAVE BEEN PERFORMED
     # TO ENSURE THE CORRECT FUNCTIONALITY OF THE CACHE
-    cache_end()
+    cache_result = cache_end()
+
+    if result and cache_result:
+        return int(cache_result) << 8 | result
+
+    return result if result else cache_result
 
 
 if __name__ == '__main__':
-    main()
+    raise SystemExit(main())

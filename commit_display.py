@@ -1,3 +1,4 @@
+from caching import get_cached_commit, cache_commit
 from colors import *
 from utils import *
 import requests
@@ -96,7 +97,7 @@ def colorForStatus(status):
         return yellow
     if status == 'added':
         return green
-    if status == 'deleted':
+    if status == 'deleted' or status == 'removed':
         return red
     return 'MISSING COLOR'
 

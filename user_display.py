@@ -31,7 +31,12 @@ def fetch_user_info(username, url, caching=CACHING_ACTIVE):
         rate_limit_check(req)
         return user_info
     else:
-        cached = get_cached_user(username)
+        try:
+            cached = get_cached_user(username)
+        except (IOError, OSError) as e:
+            perror('Could not retrieve cache values. Request will be made')
+            cached = None
+
         if not cached:
             debug('cache miss', yellow)
             clear()
@@ -49,9 +54,13 @@ def fetch_user_info(username, url, caching=CACHING_ACTIVE):
 def info_user(*clas):
     options = parse_repo_args(clas)
     user = options.user
-    user_info = fetch_user_info(user, user_url)
-    if not response_check(user_info, user):
-        return
+    try:
+        user_info = fetch_user_info(user, user_url)
+        if not response_check(user_info, user):
+            return
+    except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError) as e:
+        perror("Could not fetch user data from internet {}".format(e))
+        return 31
 
     # creates the correct DisplayObjects based on the options passed in by the user
     # Use of factories and polymorphismhelps to abstract away the choices
@@ -61,6 +70,7 @@ def info_user(*clas):
         UserInfoDisplayObject(user_info).display()
         nl()
         UserExtraInfoDisplayObject(user_info).display()
+        return 0
     elif options.repos:
         program_name()
         UserInfoDisplayObject(user_info).display()
@@ -70,24 +80,31 @@ def info_user(*clas):
         print(user_info['repos_url'])
         UserReposDisplayObjectFactory.forRepos(user,
                                                options.repos, user_info['repos_url']).display()
+        return 0
     elif options.gists:
         program_name()
         UserInfoDisplayObject(user_info).display()
         nl()
         UserGistsDisplayObjectFactory.forGists(user,
                                                options.gists, user_info['gists_url'][:-10]).display()
+        return 0
     elif options.following:
         program_name()
         UserInfoDisplayObject(user_info).display()
         nl()
         UserFollowDisplayObjectFactory.forFollow(
             user, 'following', options.following, user_info['following_url'][:-13]).display()
+        return 0
     elif options.followers:
         program_name()
         UserInfoDisplayObject(user_info).display()
         nl()
         UserFollowDisplayObjectFactory.forFollow(
             user, 'followers', options.followers, user_info['followers_url']).display()
+        return 0
+    else:
+        perror('No such option: {}'.format(options))
+        return 39
 
 
 class NoReposDisplayObject(DisplayObject):
