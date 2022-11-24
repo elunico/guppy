@@ -202,6 +202,7 @@ if CACHING_ACTIVE:
 
 def prune_max_size():
     global index
+    # sort by time from lowest (oldest) to highest (newest)
     entries = sorted(list(index.items()), key=lambda x: x[1])
     while get_cache_size() > MAX_CACHE_SIZE and len(entries) > 0:
         path = cacheTo(entries.pop(0)[0])
@@ -218,10 +219,11 @@ def prune_max_size():
 
 
 def cache_item(path, data):
-    prune_max_size()
     index[path] = time.time()
     with open(cacheTo(path), 'wb') as f:
-        return f.write(serialize(data))
+        num = f.write(serialize(data))
+    prune_max_size()
+    return num
 
 # the following are several convenience functions for storing
 # particular types of data by name that delegate to cache_item
