@@ -72,14 +72,13 @@ def info_user(*clas):
         UserExtraInfoDisplayObject(user_info).display()
         return 0
     elif options.repos:
+        repos = UserReposDisplayObjectFactory.forRepos(user, options.repos, user_info['repos_url'])
+        if repos is None:
+            return 1
         program_name()
         UserInfoDisplayObject(user_info).display()
         nl()
-        print(user)
-        print(options.repos)
-        print(user_info['repos_url'])
-        UserReposDisplayObjectFactory.forRepos(user,
-                                               options.repos, user_info['repos_url']).display()
+        repos.display()
         return 0
     elif options.gists:
         program_name()
@@ -139,8 +138,9 @@ class UserReposDisplayObjectFactory:
                     return NoReposDisplayObject()
                 return UserMultipleReposDisplayObject(all_repos)
             else:
-                raise TypeError(
+                perror(
                     'Examine a specific repo using the REPO option! Try python3 guppy.py HELP for more.')
+                return None
 
 
 class UserInfoDisplayObject(DisplayObject):

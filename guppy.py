@@ -58,16 +58,21 @@ def dispatch():
 
 
 def main():
-    result = dispatch()
-    # CACHE_END MUST BE CALLED BEFORE THE PROGRAM EXITS
-    # BUT AFTER *ALL* CACHE ACTIONS HAVE BEEN PERFORMED
-    # TO ENSURE THE CORRECT FUNCTIONALITY OF THE CACHE
-    cache_result = cache_end()
+    try:
+        result = dispatch()
+    except Exception as e:
+        print("Abnormal program termination: {}".format(e), file=sys.stderr)
+        result = 15
+    finally:
+        # CACHE_END MUST BE CALLED BEFORE THE PROGRAM EXITS
+        # BUT AFTER *ALL* CACHE ACTIONS HAVE BEEN PERFORMED
+        # TO ENSURE THE CORRECT FUNCTIONALITY OF THE CACHE
+        cache_result = cache_end()
 
     if result and cache_result:
         return int(cache_result) << 8 | result
 
-    return result if result else cache_result
+    return result | cache_result  # one must be zero bc of earlier if
 
 
 if __name__ == '__main__':
